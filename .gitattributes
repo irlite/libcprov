@@ -1,0 +1,8 @@
+injector/src/*.c linguist-vendored
+receiver/src/*.c linguist-vendored
+visualizer/src/*.c linguist-vendored
+db_interface/src/*.c linguist-vendored
+injector/build/*.h linguist-vendored
+receiver/src/*.h linguist-vendored
+visualizer/src/*.h linguist-vendored
+db_interface/src/*.h linguist-vendored
