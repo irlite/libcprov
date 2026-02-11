@@ -4,10 +4,18 @@ set -euxo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 pushd $SCRIPT_DIR
 
+for arg in "$@"; do
+    case "$arg" in
+        -c|--clean)
+            rm -rf -- build
+            ;;
+    esac
+done
+
 mkdir -p build
 pushd build
 
-if [ -x "$(command -v module)" ]; then
+if type module &>/dev/null; then
     module load gcc/14.2.0
     export CC="$(which gcc)"
     export CXX="$(which g++)"
