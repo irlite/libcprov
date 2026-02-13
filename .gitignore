@@ -41,6 +41,7 @@ test_scripts/test_hooks_synthetic
 test_scripts/test_hooks_synthetic_clang
 test_scripts/test_hooks_synthetic_go
 test_scripts/test_multithreading
+test_scripts/ML/__pycache__/
 config/cmake_install.cmake
 config/config.json
 config/Makefile
