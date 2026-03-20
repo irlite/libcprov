@@ -41,10 +41,8 @@ Parsed parse_cli(CLI::App& app, int argc, char** argv) {
     processes->add_flag("-f,--files", processes_query_opts.list_with_files,
                         "Include referenced files");
     auto files = app.add_subcommand("files", "Query files");
-    files->add_option("--exec-id", files_query_opts.exec_id,
-                      "Filter by exec id");
-    files->add_option("--process-id", files_query_opts.process_id,
-                      "Filter by process id");
+    files->add_option("process_id", files_query_opts.process_id, "Process ID")
+        ->required();
     bool reads_flag = false, writes_flag = false, deletes_flag = false;
     files->add_flag("-r,--reads", reads_flag, "Only read operations");
     files->add_flag("-w,--writes", writes_flag, "Only write operations");

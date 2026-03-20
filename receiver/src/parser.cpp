@@ -321,8 +321,7 @@ ParsedDBInterfaceRequestData parse_db_interface_request_data(
         }
         case RequestType::FileQuery: {
             FileQueryOpts o;
-            o.exec_id = get_optional_uint64(payload, "exec_id");
-            o.process_id = get_optional_uint64(payload, "process_id");
+            o.process_id = get_uint64(payload, "process_id");
             o.reads = get_bool_default_false(payload, "reads");
             o.writes = get_bool_default_false(payload, "writes");
             o.deletes = get_bool_default_false(payload, "deletes");

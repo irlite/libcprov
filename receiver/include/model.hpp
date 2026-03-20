@@ -135,8 +135,7 @@ struct ProcessesQueryOpts {
 };
 
 struct FileQueryOpts {
-    std::optional<uint64_t> exec_id;
-    std::optional<uint64_t> process_id;
+    uint64_t process_id;
     bool reads = false;
     bool writes = false;
     bool deletes = false;

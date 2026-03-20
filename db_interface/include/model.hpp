@@ -24,8 +24,7 @@ struct ProcessesQueryOpts {
 };
 
 struct FileQueryOpts {
-    std::optional<int> exec_id;
-    std::optional<int> process_id;
+    int process_id;
     bool reads = false;
     bool writes = false;
     bool deletes = false;

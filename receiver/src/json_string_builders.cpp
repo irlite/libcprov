@@ -115,6 +115,7 @@ std::string build_exec_json(ExecData exec_data) {
     std::string rename_map_json = build_json_object(exec_data.rename_map, true);
     std::string json_string =
         R"({"start_time":)" + std::to_string(exec_data.start_time.value()) +
+        R"(,"exec_id":)" + std::to_string(exec_data.exec_id.value()) +
         R"(,"processes":)" +
         build_processes_data_json(std::move(exec_data.process_map_db)) +
         R"(,"execute_map":)" + execute_map_json + R"(,"rename_map":)" +

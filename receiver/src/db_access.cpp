@@ -172,8 +172,8 @@ DBInterfaceData fetch_db_interface_db_data(
         case (RequestType::FileQuery): {
             FileQueryOpts file_query_opts =
                 std::get<FileQueryOpts>(parsed_db_interface_request_data.opts);
-            db_interface_data.db_data = db.read_operation_map(
-                sqlite3_db, file_query_opts.process_id.value());
+            db_interface_data.db_data =
+                db.read_operation_map(sqlite3_db, file_query_opts.process_id);
             break;
         }
     }
