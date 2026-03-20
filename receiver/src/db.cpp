@@ -476,12 +476,12 @@ JobData DB::get_job_data(uint64_t job_id, const std::string& cluster_name) {
     return out;
 }
 
-JobInterfaceDataRows DB::get_job_interface_data(std::string user,
+JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
                                                 uint64_t before,
                                                 uint64_t after) {
     JobInterfaceDataRows job_data_interface_rows{};
-    sqlite3* db = nullptr;
-    // sqlite3_open(db_file_.c_str(), &db);
+    // sqlite3* db = nullptr;
+    //  sqlite3_open(db_file_.c_str(), &db);
     sqlite3_stmt* st = nullptr;
     if (after != 0 && before != 0) {
         sqlite3_prepare_v2(

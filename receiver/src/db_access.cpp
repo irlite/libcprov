@@ -146,8 +146,9 @@ DBInterfaceData fetch_db_interface_db_data(
                 after_atomic_ts =
                     ddmmyyyy_to_ns_u64_utc(job_query_opts.after.value());
             }
-            db_interface_data.db_data = db.get_job_interface_data(
-                job_query_opts.user, before_atomic_ts, after_atomic_ts);
+            db_interface_data.db_data =
+                db.get_job_interface_data(sqlite3_db, job_query_opts.user,
+                                          before_atomic_ts, after_atomic_ts);
             break;
         }
         case (RequestType::ExecsQuery): {

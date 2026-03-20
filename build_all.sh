@@ -23,6 +23,7 @@ if type module &>/dev/null; then
 fi
 
 cmake .. \
+  -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_STANDARD=23 \
   -DCMAKE_CXX_STANDARD_REQUIRED=ON \
   -DCMAKE_CXX_EXTENSIONS=ON \

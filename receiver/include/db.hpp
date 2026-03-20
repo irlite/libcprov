@@ -47,7 +47,7 @@ class DB {
     };*/
     // JobData get_job_data(uint64_t slurm_id, const std::string& cluster_name);
     JobData get_job_data(uint64_t job_id, const std::string& cluster_name);
-    JobInterfaceDataRows get_job_interface_data(std::string user,
+    JobInterfaceDataRows get_job_interface_data(sqlite3* db, std::string user,
                                                 uint64_t before,
                                                 uint64_t after);
     ProcessMapDB read_processes(sqlite3* db, uint64_t exec_id, bool add_files);
