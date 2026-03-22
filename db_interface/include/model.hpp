@@ -1,7 +1,10 @@
 #pragma once
+#include <cstdint>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <variant>
+#include <vector>
 
 enum class RequestType { JobsQuery, ExecsQuery, ProcessesQuery, FileQuery };
 
@@ -35,4 +38,53 @@ struct Parsed {
     std::variant<JobsQueryOpts, ExecsQueryOpts, ProcessesQueryOpts,
                  FileQueryOpts>
         opts;
+    bool print_json = false;
 };
+
+struct FileOperations {
+    bool reads = false;
+    bool writes = false;
+    bool deletes = false;
+};
+
+struct ParsedFilesQueryData {
+    std::unordered_map<std::string, FileOperations> file_operations;
+};
+
+struct ParsedProcessesQueryData {
+    std::string process_command;
+    uint64_t process_id;
+    //"env_variable_hash": 15176325464193566520,
+    std::vector<ParsedFilesQueryData> operations;
+};
+
+struct ParsedExecsQueryData {
+    uint64_t start_time;
+    uint64_t exec_id;
+    std::vector<ParsedProcessesQueryData> processes;
+    std::unordered_map<uint64_t, std::vector<uint64_t>> executes;
+    std::unordered_map<std::string, std::string> rename_map;
+    //"env_variable_hash_pair_array" : [],
+    std::string json;
+    std::string path;
+    std::string command;
+};
+
+struct ParsedJobsQueryData {
+    uint64_t job_id;
+    std::string cluster_name;
+    std::string job_name;
+    std::string username;
+    uint64_t start_time;
+    uint64_t end_time;
+    std::string path;
+    std::string json;
+};
+
+using ParsedJobsQuery = std::vector<ParsedJobsQueryData>;
+using ParsedExecsQuery = std::vector<ParsedExecsQueryData>;
+using ParsedProcessesQuery = std::vector<ParsedProcessesQueryData>;
+using ParsedFilesQuery = std::vector<ParsedFilesQueryData>;
+
+using ParsedQuery = std::variant<ParsedJobsQuery, ParsedExecsQuery,
+                                 ParsedProcessesQuery, ParsedFilesQuery>;

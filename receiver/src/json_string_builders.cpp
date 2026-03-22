@@ -156,8 +156,8 @@ std::string convert_db_interface_data_to_json(
             jobs_json.reserve(rows.size());
             for (const auto& row : rows) {
                 std::string job_json =
-                    R"({"job_id":")" + std::to_string(row.job_id) +
-                    R"(","cluster_name":")" + row.cluster_name +
+                    R"({"job_id":)" + std::to_string(row.job_id) +
+                    R"(,"cluster_name":")" + row.cluster_name +
                     R"(","job_name":")" + row.job_name + R"(","username":")" +
                     row.username + R"(","start_time":)" +
                     std::to_string(row.start_time) + R"(,"end_time":)" +
@@ -194,7 +194,7 @@ std::string convert_db_interface_data_to_json(
                 if (ops.deleted) op_strings.push_back(R"("deleted")");
                 as_json[path] = build_json_array(op_strings);
             }
-            return R"({"files":)" + build_json_object(as_json, false) + R"(}})";
+            return R"({"files":)" + build_json_object(as_json, false) + R"(})";
         }
     }
 }

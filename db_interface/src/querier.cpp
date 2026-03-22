@@ -9,12 +9,15 @@
 #include "cli.h"
 #include "config_parser.hpp"
 #include "model.hpp"
+#include "parser.hpp"
 
 Parsed parse_cli(CLI::App& app, int argc, char** argv) {
     JobsQueryOpts jobs_query_opts;
     ExecsQueryOpts execs_query_opts;
     ProcessesQueryOpts processes_query_opts;
     FileQueryOpts files_query_opts;
+    bool print_json = false;
+    app.add_flag("-j,--json", print_json, "Print output as JSON");
     auto jobs = app.add_subcommand("jobs", "Query jobs");
     jobs->add_option("-u,--user", jobs_query_opts.user, "Filter by user");
     auto before = jobs->add_option("-b,--before", jobs_query_opts.before,
@@ -119,6 +122,11 @@ std::string post_json_and_get_response(const std::string& url,
     return response;
 }
 
+void print_response(ParsedQuery parsed_query) {
+    std::string response_string = "";
+    std::cout << response_string << "\n";
+}
+
 int main(int argc, char** argv) {
     ConfigUtil::Config config = ConfigUtil::ConfigParser::parse_config_file();
     const std::string endpoint_url = "http://" + config.post_request_ip + ":" +
@@ -128,7 +136,8 @@ int main(int argc, char** argv) {
     try {
         Parsed parsed = parse_cli(app, argc, argv);
         std::string output_string;
-        switch (parsed.request_type) {
+        RequestType request_type = parsed.request_type;
+        switch (request_type) {
             case RequestType::JobsQuery: {
                 output_string =
                     build_jobs_query_json(std::get<JobsQueryOpts>(parsed.opts));
@@ -152,11 +161,15 @@ int main(int argc, char** argv) {
         }
         std::string json_response =
             post_json_and_get_response(endpoint_url, output_string);
-        std::cout << json_response << "\n";
+        ParsedQuery parsed_query =
+            parse_db_interface_query_response(json_response, request_type);
+        if (parsed.print_json) {
+            std::cout << json_response << "\n";
+        } else {
+            print_response(parsed_query);
+        }
         return 0;
     } catch (const CLI::ParseError& e) {
         return app.exit(e);
     }
-    // ParsedResponse parsed_response = parse_response(json_response);
-    // display_query_data(parsed_response);
 }

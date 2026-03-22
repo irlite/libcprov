@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(db_interface
     src/querier.cpp
-    # src/parser.cpp
+    src/parser.cpp
     src/build_json.cpp
 )
 
