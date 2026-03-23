@@ -6,6 +6,7 @@
 #include <variant>
 
 #include "build_json.hpp"
+#include "build_output_strings.hpp"
 #include "cli.h"
 #include "config_parser.hpp"
 #include "model.hpp"
@@ -16,8 +17,6 @@ Parsed parse_cli(CLI::App& app, int argc, char** argv) {
     ExecsQueryOpts execs_query_opts;
     ProcessesQueryOpts processes_query_opts;
     FileQueryOpts files_query_opts;
-    bool print_json = false;
-    app.add_flag("-j,--json", print_json, "Print output as JSON");
     auto jobs = app.add_subcommand("jobs", "Query jobs");
     jobs->add_option("-u,--user", jobs_query_opts.user, "Filter by user");
     auto before = jobs->add_option("-b,--before", jobs_query_opts.before,
@@ -50,6 +49,11 @@ Parsed parse_cli(CLI::App& app, int argc, char** argv) {
     files->add_flag("-r,--reads", reads_flag, "Only read operations");
     files->add_flag("-w,--writes", writes_flag, "Only write operations");
     files->add_flag("-d,--deletes", deletes_flag, "Only delete operations");
+    bool print_json = false;
+    jobs->add_flag("-j,--json", print_json, "Print output as JSON");
+    execs->add_flag("-j,--json", print_json, "Print output as JSON");
+    processes->add_flag("-j,--json", print_json, "Print output as JSON");
+    files->add_flag("-j,--json", print_json, "Print output as JSON");
     app.require_subcommand(1);
     app.parse(argc, argv);
     if (*jobs && !jobs_query_opts.user) {
@@ -71,6 +75,7 @@ Parsed parse_cli(CLI::App& app, int argc, char** argv) {
         files_query_opts.deletes = deletes_flag;
     }
     Parsed parsed{};
+    parsed.print_json = print_json;
     if (*jobs) {
         parsed.request_type = RequestType::JobsQuery;
         parsed.opts = std::move(jobs_query_opts);
@@ -122,11 +127,6 @@ std::string post_json_and_get_response(const std::string& url,
     return response;
 }
 
-void print_response(ParsedQuery parsed_query) {
-    std::string response_string = "";
-    std::cout << response_string << "\n";
-}
-
 int main(int argc, char** argv) {
     ConfigUtil::Config config = ConfigUtil::ConfigParser::parse_config_file();
     const std::string endpoint_url = "http://" + config.post_request_ip + ":" +
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
         if (parsed.print_json) {
             std::cout << json_response << "\n";
         } else {
-            print_response(parsed_query);
+            std::cout << get_output_string(parsed_query, request_type);
         }
         return 0;
     } catch (const CLI::ParseError& e) {
