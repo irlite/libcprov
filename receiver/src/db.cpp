@@ -434,14 +434,14 @@ std::vector<ExecData> DB::read_execs(sqlite3* db, uint64_t job_id,
     sqlite3_finalize(st);
     for (ExecData& exec : exec_data_entries) {
         uint64_t exec_id = exec.exec_id.value();
+        exec.rename_map = read_rename_map(db, exec_id);
         if (from_visiualizer) {
             exec.process_map_db = read_processes(db, exec_id, true);
-            exec.execute_set_map_db = read_execute_set_map(db, exec_id);
-            exec.rename_map = read_rename_map(db, exec_id);
             exec.env_variables_hash_to_variables =
                 read_env_pairs_for_exec(db, exec_id);
         } else if (add_processes || add_files) {
             exec.process_map_db = read_processes(db, exec_id, add_files);
+            exec.execute_set_map_db = read_execute_set_map(db, exec_id);
         }
     }
     return exec_data_entries;
@@ -480,8 +480,6 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
                                                 uint64_t before,
                                                 uint64_t after) {
     JobInterfaceDataRows job_data_interface_rows{};
-    // sqlite3* db = nullptr;
-    //  sqlite3_open(db_file_.c_str(), &db);
     sqlite3_stmt* st = nullptr;
     if (after != 0 && before != 0) {
         sqlite3_prepare_v2(

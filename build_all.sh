@@ -22,12 +22,17 @@ if type module &>/dev/null; then
     export LDFLAGS="-ldl"
 fi
 
+ASAN_FLAGS="-fsanitize=address -fno-omit-frame-pointer -g3"
+
 cmake .. \
   -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_STANDARD=23 \
   -DCMAKE_CXX_STANDARD_REQUIRED=ON \
   -DCMAKE_CXX_EXTENSIONS=ON \
-  -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-}"
+  -DCMAKE_C_FLAGS="${ASAN_FLAGS}" \
+  -DCMAKE_CXX_FLAGS="${ASAN_FLAGS}" \
+  -DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-} ${ASAN_FLAGS}" \
+  -DCMAKE_SHARED_LINKER_FLAGS="${ASAN_FLAGS}"
 
 cmake --build . -- -j"$(nproc)"
 popd

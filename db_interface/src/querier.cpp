@@ -1,8 +1,11 @@
 #include <curl/curl.h>
 
+#include <array>
 #include <iostream>
 #include <optional>
+#include <random>
 #include <string>
+#include <string_view>
 #include <variant>
 
 #include "build_json.hpp"
@@ -161,11 +164,11 @@ int main(int argc, char** argv) {
         }
         std::string json_response =
             post_json_and_get_response(endpoint_url, output_string);
-        ParsedQuery parsed_query =
-            parse_db_interface_query_response(json_response, request_type);
         if (parsed.print_json) {
             std::cout << json_response << "\n";
         } else {
+            ParsedQuery parsed_query =
+                parse_db_interface_query_response(json_response, request_type);
             std::cout << get_output_string(parsed_query, request_type);
         }
         return 0;

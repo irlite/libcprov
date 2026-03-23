@@ -151,8 +151,6 @@ static ParsedExecsQuery parse_execs_query(ondemand::object& root_object) {
             get_uint64(exec_object, "start_time");
         parsed_execs_query_data.exec_id = get_uint64(exec_object, "exec_id");
         parsed_execs_query_data.processes = parse_processes_query(exec_object);
-        std::vector<std::string> executes_vector =
-            parse_json_string_array(exec_object, "execute_map");
         parsed_execs_query_data.executes =
             parse_execute_map(exec_object["execute_map"].get_array().value());
         ondemand::object rename_map_object =
