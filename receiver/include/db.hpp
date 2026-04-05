@@ -30,7 +30,9 @@ class DB {
     void add_execute_mapping(uint64_t exec_id, uint64_t parent_process_id,
                              uint64_t child_process_id);
     void add_operations(uint64_t process_id, const std::string& path, bool read,
-                        bool write, bool deleted);
+                        bool write, bool deleted,
+                        const std::string& start_checksum,
+                        const std::string& end_checksum);
     void add_renames(uint64_t exec_id, const std::string& original_path,
                      const std::string& new_path);
     void add_variable_hash_pair(uint64_t env_variables_hash,

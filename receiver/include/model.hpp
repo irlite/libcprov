@@ -54,6 +54,8 @@ struct Operations {
     bool read = false;
     bool write = false;
     bool deleted = false;
+    std::string start_checksum;
+    std::string end_checksum;
 };
 
 struct Process {

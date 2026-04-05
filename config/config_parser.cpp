@@ -32,6 +32,8 @@ Config ConfigParser::parse_config_file() {
     Config parsed_config;
     parsed_config.injector_path =
         get_string_field(root_object, "injector_path");
+    parsed_config.prov_artifacts_path =
+        get_string_field(root_object, "prov_artifacts_path");
     parsed_config.post_request_ip =
         get_string_field(root_object, "post_request_ip");
     parsed_config.post_request_port =

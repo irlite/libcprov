@@ -1,5 +1,6 @@
 {
 	"injector_path": "/home/hyperion/Documents/uni/ba_thesis/libcprov3/build/injector/libinjector.so",
+	"prov_artifacts_path": "/dev/shm/artifacts",
 	"post_request_ip": "127.0.0.1",
 	"post_request_port": 9000
 }

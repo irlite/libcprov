@@ -7,9 +7,9 @@
 
 std::string now_ns() {
     using namespace std::chrono;
-    uint64_t ts
-        = duration_cast<nanoseconds>(system_clock::now().time_since_epoch())
-              .count();
+    uint64_t ts =
+        duration_cast<nanoseconds>(system_clock::now().time_since_epoch())
+            .count();
     std::string ts_string = std::to_string(ts);
     return ts_string;
 }
@@ -18,9 +18,9 @@ std::string build_header(const std::string& type,
                          const std::string& path_access,
                          const std::string& slurm_job_id,
                          const std::string& slurm_cluster_name) {
-    return R"({"header":{"type":")" + type + R"(","job_id":)" + slurm_job_id
-           + R"(,"cluster_name":")" + slurm_cluster_name + R"(","timestamp":)"
-           + now_ns() + R"(})";
+    return R"({"header":{"type":")" + type + R"(","job_id":)" + slurm_job_id +
+           R"(,"cluster_name":")" + slurm_cluster_name + R"(","timestamp":)" +
+           now_ns() + R"(})";
 }
 
 std::string build_start_json_output(const std::string& job_name,
@@ -28,9 +28,9 @@ std::string build_start_json_output(const std::string& job_name,
                                     const std::string& path_start,
                                     const std::string& json_start_extra) {
     std::string absolute_path_start = std::filesystem::canonical(path_start);
-    return R"(,"payload":{"job_name":")" + job_name + R"(","username":")"
-           + username + R"(","json":")" + json_start_extra + R"(","path":")"
-           + absolute_path_start + R"("}})";
+    return R"(,"payload":{"job_name":")" + job_name + R"(","username":")" +
+           username + R"(","json":")" + json_start_extra + R"(","path":")" +
+           absolute_path_start + R"("}})";
 }
 
 std::string build_end_json_output(const std::string& json_end_extra) {
@@ -81,13 +81,13 @@ std::string build_execute_map_json(const ExecuteSetMap& execute_set_map) {
         std::vector<std::string> child_process_id_vector;
         child_process_id_vector.reserve(child_process_id_set.size());
         for (std::string child_process_id : child_process_id_set) {
-            child_process_id_vector.push_back(R"(")" + child_process_id
-                                              + R"(")");
+            child_process_id_vector.push_back(R"(")" + child_process_id +
+                                              R"(")");
         }
-        std::string execute_map_json
-            = (R"({"parent_process_id":")" + parent_process_id
-               + R"(","child_process_id_array":)"
-               + build_json_array(child_process_id_vector) + "}");
+        std::string execute_map_json =
+            (R"({"parent_process_id":")" + parent_process_id +
+             R"(","child_process_id_array":)" +
+             build_json_array(child_process_id_vector) + "}");
         execute_map_json_strings.push_back(execute_map_json);
     }
     return build_json_array(execute_map_json_strings);
@@ -98,9 +98,9 @@ std::string build_env_variables_map_json(
     std::vector<std::string> env_variables_map_json_strings;
     for (auto& [env_variable_hash, env_variables_string] :
          env_variables_hash_to_variables) {
-        std::string env_variables_map_json_string
-            = R"({"env_variables_hash":)" + std::to_string(env_variable_hash)
-              + R"(,"env_variables_array":)" + env_variables_string + R"(})";
+        std::string env_variables_map_json_string =
+            R"({"env_variables_hash":)" + std::to_string(env_variable_hash) +
+            R"(,"env_variables_array":)" + env_variables_string + R"(})";
         env_variables_map_json_strings.push_back(env_variables_map_json_string);
     }
     return build_json_array(env_variables_map_json_strings);
@@ -118,7 +118,6 @@ std::string build_operations_json(
     for (auto& [path, operations] : operation_map) {
         std::vector<std::string> operation_strings;
         bool first = true;
-        // return path;
         if (operations.read) {
             operation_strings.push_back(R"("read")");
         }
@@ -128,7 +127,18 @@ std::string build_operations_json(
         if (operations.deleted) {
             operation_strings.push_back(R"("deleted")");
         }
-        operation_map_json_format[path] = build_json_array(operation_strings);
+        std::string start_checksum =
+            operations.start_checksum.empty()
+                ? "null"
+                : R"(")" + operations.start_checksum + R"(")";
+        std::string end_checksum =
+            operations.end_checksum.empty()
+                ? "null"
+                : R"(")" + operations.end_checksum + R"(")";
+        operation_map_json_format[path] =
+            R"({"performed_operations":)" +
+            build_json_array(operation_strings) + R"(,"start_checksum":)" +
+            start_checksum + R"(,"end_checksum":)" + end_checksum + "}";
     }
     return build_json_object(operation_map_json_format, false);
 }
@@ -137,11 +147,11 @@ std::string build_processes_data_json(ProcessMap process_map) {
     bool first = true;
     std::vector<std::string> process_json_vector;
     for (auto& [process_id, process] : process_map) {
-        std::string process_json
-            = R"({"process_command":")" + process.process_name
-              + R"(","process_id":")" + process_id + R"(","env_variable_hash":)"
-              + std::to_string(process.env_variable_hash) + R"(,"operations":)"
-              + build_operations_json(process.operation_map) + R"(})";
+        std::string process_json =
+            R"({"process_command":")" + process.process_name +
+            R"(","process_id":")" + process_id + R"(","env_variable_hash":)" +
+            std::to_string(process.env_variable_hash) + R"(,"operations":)" +
+            build_operations_json(process.operation_map) + R"(})";
         process_json_vector.push_back(process_json);
     }
     return build_json_array(process_json_vector);
@@ -153,21 +163,20 @@ std::string build_exec_json_output(const std::string& path_exec,
                                    ProcessedExecData processed_exec_data) {
     std::string type = "exec";
     std::string absolute_path_exec = std::filesystem::canonical(path_exec);
-    std::string env_variable_hash_pair_array_string
-        = build_env_variables_map_json(
+    std::string env_variable_hash_pair_array_string =
+        build_env_variables_map_json(
             processed_exec_data.env_variables_hash_to_variables);
-    std::string execute_map_json
-        = build_execute_map_json(processed_exec_data.execute_set_map);
-    std::string rename_map_json
-        = build_json_object(processed_exec_data.rename_map, true);
-    std::string json_string
-        = R"(,"payload":{"processes":)"
-          + build_processes_data_json(
-              std::move(processed_exec_data.process_map))
-          + R"(,"execute_map":)" + execute_map_json + R"(,"rename_map":)"
-          + rename_map_json + R"(,"env_variable_hash_pair_array":)"
-          + env_variable_hash_pair_array_string + R"(,"json":")" + json_exec
-          + R"(","path":")" + absolute_path_exec + R"(","command":")" + cmd
-          + R"("}})";
+    std::string execute_map_json =
+        build_execute_map_json(processed_exec_data.execute_set_map);
+    std::string rename_map_json =
+        build_json_object(processed_exec_data.rename_map, true);
+    std::string json_string =
+        R"(,"payload":{"processes":)" +
+        build_processes_data_json(std::move(processed_exec_data.process_map)) +
+        R"(,"execute_map":)" + execute_map_json + R"(,"rename_map":)" +
+        rename_map_json + R"(,"env_variable_hash_pair_array":)" +
+        env_variable_hash_pair_array_string + R"(,"json":")" + json_exec +
+        R"(","path":")" + absolute_path_exec + R"(","command":")" + cmd +
+        R"("}})";
     return json_string;
 }

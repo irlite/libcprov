@@ -31,3 +31,8 @@ This project includes or depends on the following external libraries:
   Embedded SQL database engine.
   Source: (https://github.com/sqlite/sqlite)
   Version: 3.51.2
+
+- picosha2 (MIT License)
+  Header-only C++ SHA-256 hash implementation.
+  Source: (https://github.com/okdshin/PicoSHA2)
+  Commit: 27fcf6979298949e8a4620c81f0b45d4d1b0a3a3

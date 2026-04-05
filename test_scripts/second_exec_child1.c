@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define BASE_PATH "/dev/shm"
+#define BASE_PATH "/dev/shm/ts1"
 
 int main() {
     FILE* fp;

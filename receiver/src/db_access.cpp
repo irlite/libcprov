@@ -38,7 +38,9 @@ void add_operations(
         uint64_t process_db_id = process_id_to_process_db_id[process_id];
         for (auto& [path, operations] : process.operation_map) {
             db.add_operations(process_db_id, path, operations.read,
-                              operations.write, operations.deleted);
+                              operations.write, operations.deleted,
+                              operations.start_checksum,
+                              operations.end_checksum);
         }
     }
 }

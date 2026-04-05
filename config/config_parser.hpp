@@ -7,6 +7,7 @@
 namespace ConfigUtil {
 struct Config {
     std::string injector_path;
+    std::string prov_artifacts_path;
     std::string post_request_ip;
     uint16_t post_request_port;
 };

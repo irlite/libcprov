@@ -24,7 +24,7 @@ void loop_request_processing(std::queue<std::string>& request_queue, DB& db,
             local_queue = std::move(request_queue);
         }
         while (!local_queue.empty()) {
-            parse_injector_data(local_queue.front());
+            // parse_injector_data(local_queue.front());
             save_db_data(db, parse_injector_data(local_queue.front()));
             local_queue.pop();
         }

@@ -26,6 +26,9 @@ void start_preload_process(const std::string& so_path, const std::string& cmd,
     pid_t pid = fork();
     if (pid == 0) {
         if (!so_path.empty()) setenv("LD_PRELOAD", so_path.c_str(), 1);
+        std::cout << so_path << std::endl;
+        std::cout << cmd << std::endl;
+        std::cout << path_access << std::endl;
         execl("/bin/sh", "sh", "-c", cmd.c_str(), (char*)nullptr);
         _exit(127);
     } else if (pid > 0) {

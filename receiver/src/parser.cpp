@@ -10,9 +10,11 @@
 using namespace simdjson;
 
 std::string get_string(ondemand::object& obj, const char* name) {
-    simdjson_result<std::string_view> result =
-        obj.find_field_unordered(name).get_string();
-    return std::string(result.value());
+    simdjson::ondemand::value val = obj[name];
+    if (val.is_null()) {
+        return "";
+    }
+    return std::string(val.get_string().value());
 }
 
 uint64_t get_uint64(ondemand::object& obj, const char* name) {
@@ -70,25 +72,37 @@ OperationType get_operation_type(const std::string& operation_string) {
 std::unordered_map<std::string, Operations> parse_operation_map(
     ondemand::object& json_operation_map) {
     std::unordered_map<std::string, Operations> operation_map;
-    for (ondemand::field json_operation_mapping : json_operation_map) {
+    for (auto json_operation_mapping : json_operation_map) {
         std::string_view path_sv;
-        (void)json_operation_mapping.unescaped_key().get(path_sv);
+        json_operation_mapping.unescaped_key().get(path_sv);
         std::string path(path_sv);
-        ondemand::array ops_arr;
-        (void)json_operation_mapping.value().get_array().get(ops_arr);
+        ondemand::object json_operation_mapping_object =
+            json_operation_mapping.value().get_object().value();
+
         Operations& ops = operation_map[path];
-        for (simdjson::ondemand::value operation : ops_arr) {
-            std::string_view operation_sv;
-            (void)operation.get_string().get(operation_sv);
-            std::string operation_string(operation_sv);
-            if (operation_string == "read") {
+        ops.read = false;
+        ops.write = false;
+        ops.deleted = false;
+        auto performed_ops_val =
+            json_operation_mapping_object
+                .find_field_unordered("performed_operations")
+                .get_array()
+                .value();
+        for (auto op_val : performed_ops_val) {
+            std::string_view op_sv;
+            op_val.get_string().get(op_sv);
+            std::string op_str(op_sv);
+            if (op_str == "read")
                 ops.read = true;
-            } else if (operation_string == "write") {
+            else if (op_str == "write")
                 ops.write = true;
-            } else if (operation_string == "deleted") {
+            else if (op_str == "deleted")
                 ops.deleted = true;
-            }
         }
+        ops.start_checksum =
+            get_string(json_operation_mapping_object, "start_checksum");
+        ops.end_checksum =
+            get_string(json_operation_mapping_object, "end_checksum");
     }
     return operation_map;
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -75,14 +76,14 @@ struct Event {
 
 using EventsByFile = std::vector<std::vector<Event>>;
 
-struct BackupOperations {
+/*struct BackupOperations {
     bool read = false;
     bool write = false;
     bool execute = false;
-};
+};*/
 
-using OperationsDataBackupFormat
-    = std::unordered_map<std::string, BackupOperations>;
+// using OperationsDataBackupFormat =
+//     std::unordered_map<std::string, BackupOperations>;
 
 using EnvVariablesHashToVariables = std::unordered_map<uint64_t, std::string>;
 /*uint64_t hash;
@@ -90,13 +91,15 @@ std::string env_variables;
 }
 ;*/
 
-using ExecuteSetMap
-    = std::unordered_map<std::string, std::unordered_set<std::string>>;
+using ExecuteSetMap =
+    std::unordered_map<std::string, std::unordered_set<std::string>>;
 
 struct Operations {
     bool read = false;
     bool write = false;
     bool deleted = false;
+    std::string start_checksum;
+    std::string end_checksum;
 };
 
 struct LinuxProcess {
@@ -124,6 +127,7 @@ struct ProcessedExecData {
     std::unordered_map<uint64_t, std::string> env_variables_hash_to_variables;
 };
 struct ProcessedInjectorData {
-    OperationsDataBackupFormat operations_data_backup_format;
     ProcessedExecData processed_exec_data;
 };
+
+using ChecksumsByFiles = std::unordered_map<std::string, std::string>;

@@ -87,6 +87,8 @@ void DB::build_tables() {
         "  read INTEGER NOT NULL DEFAULT 0,"
         "  write INTEGER NOT NULL DEFAULT 0,"
         "  deleted INTEGER NOT NULL DEFAULT 0,"
+        "  start_checksum TEXT,"
+        "  end_checksum TEXT,"
         "  PRIMARY KEY (process_id, path),"
         "  FOREIGN KEY (process_id)"
         "    REFERENCES processes(process_id)"
@@ -140,10 +142,11 @@ void DB::init_job(uint64_t job_id, const std::string& cluster_name) {
                        "INSERT INTO execute_mappings(exec_id, "
                        "parent_process_id, child_process_id) VALUES (?, ?, ?);",
                        -1, &job_db_context.insert_execute_mapping, nullptr);
-    sqlite3_prepare_v2(job_db_context.db,
-                       "INSERT INTO operations(process_id, path, read, write, "
-                       "deleted) VALUES (?, ?, ?, ?, ?);",
-                       -1, &job_db_context.insert_operations, nullptr);
+    sqlite3_prepare_v2(
+        job_db_context.db,
+        "INSERT INTO operations(process_id, path, read, write, "
+        "deleted, start_checksum, end_checksum) VALUES (?, ?, ?, ?, ?, ?, ?);",
+        -1, &job_db_context.insert_operations, nullptr);
     sqlite3_prepare_v2(job_db_context.db,
                        "INSERT INTO renames(exec_id, original_path, new_path)"
                        " VALUES (?, ?, ?);",
@@ -245,13 +248,19 @@ void DB::add_execute_mapping(uint64_t exec_id, uint64_t parent_process_id,
     sqlite3_reset(current_job_.insert_execute_mapping);
 }
 void DB::add_operations(uint64_t process_id, const std::string& path, bool read,
-                        bool write, bool deleted) {
+                        bool write, bool deleted,
+                        const std::string& start_checksum,
+                        const std::string& end_checksum) {
     sqlite3_bind_int64(current_job_.insert_operations, 1, process_id);
     sqlite3_bind_text(current_job_.insert_operations, 2, path.c_str(), -1,
                       SQLITE_TRANSIENT);
     sqlite3_bind_int(current_job_.insert_operations, 3, read);
     sqlite3_bind_int(current_job_.insert_operations, 4, write);
     sqlite3_bind_int(current_job_.insert_operations, 5, deleted);
+    sqlite3_bind_text(current_job_.insert_operations, 6, start_checksum.c_str(),
+                      -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(current_job_.insert_operations, 7, end_checksum.c_str(),
+                      -1, SQLITE_TRANSIENT);
     sqlite3_step(current_job_.insert_operations);
     sqlite3_reset(current_job_.insert_operations);
 }

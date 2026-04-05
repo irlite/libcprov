@@ -2,7 +2,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define BASE_PATH "/dev/shm"
+#define BASE_PATH "/dev/shm/ts1"
 extern char** environ;
 
 static int run_child(const char* path, const char* argv0) {

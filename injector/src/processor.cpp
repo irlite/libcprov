@@ -6,8 +6,10 @@
 #include <cstdint>
 #include <stack>
 #include <string>
+#include <unordered_set>
 
 #include "model.hpp"
+#include "xxhash.h"
 
 LinuxProcessMap init_processing(EventsByFile& events_by_file) {
     LinuxProcessMap linux_process_map;
@@ -139,9 +141,7 @@ void sort_events(std::vector<Event>& events) {
               [](const Event& a, const Event& b) { return a.ts < b.ts; });
 }
 
-void log_process_start(
-    Event event, ProcessedExecData& processed_exec_data,
-    OperationsDataBackupFormat& operations_data_backup_format) {
+void log_process_start(Event event, ProcessedExecData& processed_exec_data) {
     const auto& process_start = std::get<ProcessStart>(event.event_payload);
     if (!processed_exec_data.process_map.contains(event.process_id)) {
         std::string process_name = process_start.process_name;
@@ -156,38 +156,33 @@ void log_process_start(
         std::string executable = (first_space_pos == std::string::npos)
                                      ? process_name
                                      : process_name.substr(0, first_space_pos);
-        operations_data_backup_format[executable] =
-            BackupOperations{.read = false, .write = false, .execute = true};
+        // operations_data_backup_format[executable] =
+        //     BackupOperations{.read = false, .write = false, .execute = true};
     }
 }
 
 void log_operation(const std::string& path, const std::string& process_id,
-                   ProcessedExecData& processed_exec_data,
-                   OperationsDataBackupFormat& operations_data_backup_format,
-                   SysOp op_type) {
-    // if (path.starts_with("/dev") || path.starts_with("/proc")) {
-    if (path.starts_with("/proc")) {
-        return;
-    }
-    std::string resolved_path = path;
+                   ProcessedExecData& processed_exec_data, SysOp op_type,
+                   std::string checksum) {
+    /*std::string resolved_path = path;
     auto it = processed_exec_data.rename_map.find(path);
     if (it != processed_exec_data.rename_map.end()) {
         resolved_path = it->second;
-    }
+    }*/
     Operations& selected_operations =
-        processed_exec_data.process_map[process_id]
-            .operation_map[resolved_path];
-    BackupOperations& selected_backup_operations =
-        operations_data_backup_format[resolved_path];
+        processed_exec_data.process_map[process_id].operation_map[path];
+    // BackupOperations& selected_backup_operations =
+    //     operations_data_backup_format[resolved_path];
+    if (checksum != "") {
+        selected_operations.start_checksum = checksum;
+    }
     switch (op_type) {
         case SysOp::Write: {
             selected_operations.write = true;
-            selected_backup_operations.write = true;
             break;
         }
         case SysOp::Read: {
             selected_operations.read = true;
-            selected_backup_operations.read = true;
             break;
         }
         case SysOp::Unlink: {
@@ -210,23 +205,47 @@ void log_rename(const Event& event, ProcessedExecData& processed_exec_data) {
         rename_map[new_path] = it->second;
         rename_map.erase(it);
     }
+    for (auto& [process_id, process] : processed_exec_data.process_map) {
+        auto it = process.operation_map.find(original_path);
+        if (it != process.operation_map.end()) {
+            process.operation_map[new_path] = it->second;
+            process.operation_map.erase(it);
+        }
+    }
+    // processed_exec_data.process_map[process_id].operation_map[path];
 };
 
-ProcessedInjectorData process_events(EventsByFile& events_by_file) {
+std::string get_checksum(ChecksumsByFiles& original_checksums_by_files,
+                         std::unordered_set<std::string>& seen_files,
+                         const std::string& path) {
+    if (!seen_files.contains(path)) {
+        seen_files.insert(path);
+        if (original_checksums_by_files.contains(path)) {
+            return original_checksums_by_files[path];
+        }
+    }
+    return "";
+}
+
+ProcessedExecData process_events(EventsByFile& events_by_file,
+                                 ChecksumsByFiles original_checksums_by_files) {
     LinuxProcessMap linux_process_map = init_processing(events_by_file);
     std::vector<Event> events = combine_events(std::move(events_by_file));
     ExecuteSetMap execute_set_map = resolve_forks(linux_process_map, events);
     sort_events(events);
     std::unordered_map<std::string, std::stack<Event>> enqueued_execs;
     ProcessedExecData processed_exec_data;
-    OperationsDataBackupFormat operations_data_backup_format;
+    std::unordered_set<std::string> seen_files;
+    bool file_already_seen;
+    std::string checksum;
     for (const Event& event : events) {
+        checksum = "";
         SysOp op = event.operation;
         const EventPayload& payload = event.event_payload;
+        file_already_seen = true;
         switch (op) {
             case SysOp::ProcessStart: {
-                log_process_start(event, processed_exec_data,
-                                  operations_data_backup_format);
+                log_process_start(event, processed_exec_data);
                 break;
             }
             case SysOp::Write:
@@ -235,19 +254,26 @@ ProcessedInjectorData process_events(EventsByFile& events_by_file) {
                 const std::string& path =
                     std::get<std::string>(event.event_payload);
                 std::string process_id = event.process_id;
-                log_operation(path, process_id, processed_exec_data,
-                              operations_data_backup_format, op);
+                if (!seen_files.contains(path)) {
+                    seen_files.insert(path);
+                    checksum = original_checksums_by_files[path];
+                }
+                log_operation(path, process_id, processed_exec_data, op,
+                              checksum);
                 break;
             }
             case SysOp::Transfer: {
                 const Transfer& transfer =
                     std::get<Transfer>(event.event_payload);
+                const std::string& path_read = transfer.path_read;
+                if (!seen_files.contains(path_read)) {
+                    seen_files.insert(path_read);
+                    checksum = original_checksums_by_files[path_read];
+                }
+                log_operation(path_read, event.process_id, processed_exec_data,
+                              SysOp::Read, checksum);
                 log_operation(transfer.path_write, event.process_id,
-                              processed_exec_data,
-                              operations_data_backup_format, SysOp::Write);
-                log_operation(transfer.path_read, event.process_id,
-                              processed_exec_data,
-                              operations_data_backup_format, SysOp::Read);
+                              processed_exec_data, SysOp::Write, "");
                 break;
             }
             case SysOp::Rename: {
@@ -268,6 +294,5 @@ ProcessedInjectorData process_events(EventsByFile& events_by_file) {
     }
     processed_exec_data.execute_set_map =
         resolve_execs(enqueued_execs, linux_process_map, execute_set_map);
-    return ProcessedInjectorData{operations_data_backup_format,
-                                 processed_exec_data};
+    return processed_exec_data;
 }

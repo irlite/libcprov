@@ -13,9 +13,10 @@ add_executable(prov
     src/processor.cpp
     src/json_string_builders.cpp
     src/get_job_info.cpp
-    src/data_backup.cpp
     src/process_coordinator.cpp
+    src/ingester.cpp
     src/xxhash.c
+    src/sqlite3.c
 )
 
 target_include_directories(prov PRIVATE

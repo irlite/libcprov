@@ -1,5 +1,6 @@
 #include <curl/curl.h>
 #include <simdjson.h>
+#include <sqlite3.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -8,8 +9,8 @@
 
 #include "cli.h"
 #include "config_parser.hpp"
-#include "data_backup.hpp"
 #include "get_job_info.hpp"
+#include "ingester.hpp"
 #include "json_string_builders.hpp"
 #include "model.hpp"
 #include "parser.hpp"
@@ -17,12 +18,14 @@
 #include "processor.hpp"
 #include "xxhash.h"
 
-ProcessedInjectorData extract_injector_data(const std::string& path_access) {
+ProcessedExecData extract_injector_data(
+    const std::string& path_access,
+    ChecksumsByFiles original_checksums_by_files) {
     EventsByFile events_by_file = parse_all_jsonl_files(path_access);
     std::filesystem::remove_all(path_access);
-    ProcessedInjectorData processed_injector_data =
-        process_events(events_by_file);
-    return processed_injector_data;
+    ProcessedExecData processed_exec_data =
+        process_events(events_by_file, original_checksums_by_files);
+    return processed_exec_data;
 }
 
 enum class Mode { Start, End, Exec };
@@ -127,7 +130,14 @@ int main(int argc, char** argv) {
             std::string exec_path = exec_opts.path;
             std::string absolute_path_exec =
                 std::filesystem::canonical(exec_path).string();
-            backup_data_pre_exec(absolute_path_exec);
+            auto [excluded_files, excluded_dirs] =
+                parse_ignore_file(exec_opts.path);
+            sqlite3* db = create_and_open_db(config.prov_artifacts_path);
+            ChecksumsByFiles original_checksums_by_files =
+                collect_directory_files(absolute_path_exec, excluded_dirs,
+                                        excluded_files);
+            process_files(db, config.prov_artifacts_path,
+                          original_checksums_by_files);
             std::string exec_json_input = exec_opts.json;
             std::string exec_command = exec_opts.command;
             std::string injector_data_path = path_access;
@@ -135,13 +145,20 @@ int main(int argc, char** argv) {
             std::string injector_path = config.injector_path;
             start_preload_process(injector_path, exec_command,
                                   injector_data_path);
-            ProcessedInjectorData processed_injector_data =
-                extract_injector_data(injector_data_path);
-            ingest_prov_data(
-                processed_injector_data.operations_data_backup_format);
+            ProcessedExecData processed_exec_data = extract_injector_data(
+                injector_data_path, original_checksums_by_files);
+            ChecksumsByFiles new_checksums_by_files =
+                collect_files_after_processing(absolute_path_exec,
+                                               excluded_dirs, excluded_files,
+                                               processed_exec_data);
+            attach_checksums_after_processing(new_checksums_by_files,
+                                              processed_exec_data);
+            process_files(db, config.prov_artifacts_path,
+                          new_checksums_by_files);
+            close_db_connection(db);
             std::string exec_json_output = build_exec_json_output(
                 absolute_path_exec, exec_json_input, exec_command,
-                std::move(processed_injector_data.processed_exec_data));
+                std::move(processed_exec_data));
             send_json(endpoint_url, header, exec_json_output);
             break;
         }
