@@ -1,13 +1,12 @@
-#include "parser.hpp"
-
 #include <simdjson.h>
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
-#include "model.hpp"
+#include "querier/querier_model.hpp"
 
 using namespace simdjson;
 

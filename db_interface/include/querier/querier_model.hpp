@@ -27,7 +27,7 @@ struct ProcessesQueryOpts {
 };
 
 struct FileQueryOpts {
-    int process_id;
+    int process_id = 0;
     bool reads = false;
     bool writes = false;
     bool deletes = false;
@@ -54,7 +54,6 @@ struct ParsedFilesQueryData {
 struct ParsedProcessesQueryData {
     std::string process_command;
     uint64_t process_id;
-    //"env_variable_hash": 15176325464193566520,
     std::vector<ParsedFilesQueryData> operations;
 };
 
@@ -64,7 +63,6 @@ struct ParsedExecsQueryData {
     std::vector<ParsedProcessesQueryData> processes;
     std::unordered_map<uint64_t, std::vector<uint64_t>> executes;
     std::unordered_map<std::string, std::string> rename_map;
-    //"env_variable_hash_pair_array" : [],
     std::string json;
     std::string path;
     std::string command;

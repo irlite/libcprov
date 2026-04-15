@@ -4,7 +4,7 @@
 #include <string>
 #include <string_view>
 
-#include "model.hpp"
+#include "querier/querier_model.hpp"
 
 static bool supports_color_stdout() {
     if (!isatty(STDOUT_FILENO)) return false;

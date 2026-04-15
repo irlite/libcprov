@@ -1,6 +1,6 @@
 #include <string>
 
-#include "model.hpp"
+#include "querier/querier_model.hpp"
 
 std::string build_jobs_query_json(const JobsQueryOpts& jobs_query_opts) {
     const std::string user = jobs_query_opts.user.value();

@@ -77,6 +77,11 @@ int main() {
             std::string json_response_data =
                 convert_db_interface_data_to_json(std::move(db_interface_data));
             res.set_content(json_response_data, "application/json");
+        },
+        [&](const httplib::Request& req, httplib::Response& res) {
+            std::cerr << "[http] POST /retriever_api size=" << req.body.size()
+                      << "\n";
+            // res.set_content(json_response_data, "application/json");
         });
     server.run(4);
     return 0;
