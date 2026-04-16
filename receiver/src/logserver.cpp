@@ -25,9 +25,9 @@ void LogServer::set_log_handlers(Handler prov_api_handler,
                   db_interface_api_handler_(req, res);
               });
 
-    svr_.Post("/db_interface_api",
+    svr_.Post("/retriever_api",
               [this](const httplib::Request& req, httplib::Response& res) {
-                  db_interface_api_handler_(req, res);
+                  retriever_api_handler_(req, res);
               });
 }
 

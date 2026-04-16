@@ -44,6 +44,7 @@ test_scripts/test_multithreading
 test_scripts/ML/__pycache__/
 config/cmake_install.cmake
 config/Makefile
+config/config.json
 config/CMakeFiles/
 model_graphs/*
 !model_graphs/

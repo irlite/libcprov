@@ -459,8 +459,9 @@ std::vector<ExecData> DB::read_execs(sqlite3* db, uint64_t job_id,
 JobData DB::get_job_data(uint64_t job_id, const std::string& cluster_name) {
     JobData out{};
     out.succeded = false;
-    sqlite3* db = nullptr;
-    sqlite3_open(db_file_.c_str(), &db);
+    /*sqlite3* db = nullptr;
+    sqlite3_open(db_file_.c_str(), &db);*/
+    sqlite3* db = this->open_db();
     sqlite3_stmt* st = nullptr;
     sqlite3_prepare_v2(
         db,
@@ -543,4 +544,78 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
     sqlite3_finalize(st);
     // sqlite3_close(db);
     return job_data_interface_rows;
+}
+
+std::unordered_map<uint64_t, std::unordered_map<std::string, Operations>>
+DB::fetch_job_operations(uint64_t job_id, const std::string& cluster_name) {
+    sqlite3* db = this->open_db();
+    sqlite3_stmt* st = nullptr;
+    const char* sql =
+        "SELECT e.exec_id, o.path, "
+        "MAX(o.read), MAX(o.write), MAX(o.deleted), "
+        "MAX(NULLIF(o.start_checksum, '')), "
+        "MAX(NULLIF(o.end_checksum, '')) "
+        "FROM jobs j "
+        "JOIN execs e ON j.job_id = e.job_id AND j.cluster_name = "
+        "e.cluster_name "
+        "JOIN processes p ON p.exec_id = e.exec_id "
+        "JOIN operations o ON o.process_id = p.process_id "
+        "WHERE j.job_id = ? AND j.cluster_name = ? "
+        "GROUP BY e.exec_id, o.path "
+        "ORDER BY e.exec_id;";
+    sqlite3_prepare_v2(db, sql, -1, &st, nullptr);
+    sqlite3_bind_int64(st, 1, job_id);
+    sqlite3_bind_text(st, 2, cluster_name.c_str(), -1, SQLITE_TRANSIENT);
+    std::unordered_map<uint64_t, std::unordered_map<std::string, Operations>>
+        result;
+    while (sqlite3_step(st) == SQLITE_ROW) {
+        uint64_t exec_id = sqlite3_column_int64(st, 0);
+        const char* path_c =
+            reinterpret_cast<const char*>(sqlite3_column_text(st, 1));
+        std::string path = path_c ? path_c : "";
+        Operations op;
+        op.read = sqlite3_column_int(st, 2);
+        op.write = sqlite3_column_int(st, 3);
+        op.deleted = sqlite3_column_int(st, 4);
+        const char* start =
+            reinterpret_cast<const char*>(sqlite3_column_text(st, 5));
+        const char* end =
+            reinterpret_cast<const char*>(sqlite3_column_text(st, 6));
+        op.start_checksum = start ? start : "";
+        op.end_checksum = end ? end : "";
+        result[exec_id][path] = std::move(op);
+    }
+    sqlite3_finalize(st);
+    return result;
+}
+
+JobIdentifier DB::fetch_job_identifier_from_exec_id(uint64_t exec_id) {
+    sqlite3* db = this->open_db();
+    sqlite3_stmt* st = nullptr;
+    sqlite3_prepare_v2(
+        db, "SELECT job_id, cluster_name FROM execs WHERE exec_id = ?;", -1,
+        &st, nullptr);
+    sqlite3_bind_int64(st, 1, (sqlite3_int64)exec_id);
+    sqlite3_step(st);
+    JobIdentifier result{};
+    result.job_id = sqlite3_column_int64(st, 0);
+    result.cluster_name =
+        reinterpret_cast<const char*>(sqlite3_column_text(st, 1));
+    sqlite3_finalize(st);
+    return result;
+}
+
+bool DB::check_if_checksum_exists(std::string checksum) {
+    sqlite3* db = this->open_db();
+    sqlite3_stmt* st = nullptr;
+    sqlite3_prepare_v2(db,
+                       "SELECT EXISTS(SELECT 1 FROM operations "
+                       "WHERE start_checksum = ? OR end_checksum = ?);",
+                       -1, &st, nullptr);
+    sqlite3_bind_text(st, 1, checksum.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 2, checksum.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_step(st);
+    bool exists = sqlite3_column_int(st, 0);
+    sqlite3_finalize(st);
+    return exists;
 }

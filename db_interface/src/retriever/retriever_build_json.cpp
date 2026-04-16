@@ -5,7 +5,8 @@
 
 std::string wrap_in_retriever_type(std::string retriever_json,
                                    std::string type) {
-    return R"({"type":")" + type + R"(","content":)" + retriever_json + "}";
+    return R"({"retriever_request_type":")" + type + R"(","payload":)" +
+           retriever_json + "}";
 }
 
 std::string build_job_retriever_json(uint64_t job_id, std::string cluster) {
@@ -18,10 +19,10 @@ std::string build_job_retriever_json(uint64_t job_id, std::string cluster) {
 std::string build_exec_retriever_json(uint64_t exec_id) {
     std::string retriever_json =
         R"({"exec_id":)" + std::to_string(exec_id) + R"("})";
-    return wrap_in_retriever_type(retriever_json, "job");
+    return wrap_in_retriever_type(retriever_json, "exec_id");
 }
 
 std::string build_checksum_retriever_json(std::string checksum) {
     std::string retriever_json = R"({"checksum":)" + checksum + R"("})";
-    return wrap_in_retriever_type(retriever_json, "job");
+    return wrap_in_retriever_type(retriever_json, "checksum");
 }

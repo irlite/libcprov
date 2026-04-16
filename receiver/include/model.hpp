@@ -110,7 +110,8 @@ struct JobData {
 };
 
 //--- GRAPH ---
-struct ParsedGraphRequestData {
+struct JobIdentifier {
+    // struct ParsedGraphRequestData {
     uint64_t job_id;
     std::string cluster_name;
 };
@@ -193,4 +194,20 @@ struct DBInterfaceData {
     std::variant<JobInterfaceDataRows, ExecDataInterfaceRows, ProcessMapDB,
                  DBOperationsRows>
         db_data;
+};
+
+// -- Retriever
+enum class RetrieverRequestType { Job, ExecId, Checksum };
+
+struct ParsedRetrieverData {
+    RetrieverRequestType request_type;
+    std::variant<JobIdentifier, uint64_t, std::string> parsed_retriever_request;
+};
+
+struct DBRetrieverData {
+    RetrieverRequestType request_type;
+    std::variant<std::unordered_map<
+                     uint64_t, std::unordered_map<std::string, Operations>>,
+                 JobData, bool>
+        operations_by_exec;
 };

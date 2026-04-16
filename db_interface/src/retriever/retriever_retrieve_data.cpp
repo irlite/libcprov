@@ -95,16 +95,20 @@ std::unordered_map<std::string, std::string> get_state_after_exec(
 void move_artifact(const std::string& prov_artifacts_path,
                    const std::string& checksum,
                    const std::string& target_path) {
-    fs::path src =
-        fs::path(prov_artifacts_path) / checksum.substr(0, 2) / checksum;
+    fs::path src = fs::path(prov_artifacts_path) / "artifact_files" /
+                   checksum.substr(0, 2) / checksum;
     fs::path dst(target_path);
     fs::create_directories(dst.parent_path());
-    fs::copy_file(src, dst, fs::copy_options::overwrite_existing);
+    // fs::copy_file(src, dst, fs::copy_options::overwrite_existing);
+    // fs::copy_file(src, dst);
+    if (!fs::exists(dst)) {
+        fs::copy_file(src, dst);
+    }
 }
 
 void rebuild_state(const std::string& prov_artifacts_path,
                    std::unordered_map<std::string, std::string> state) {
-    for (auto& [path, checksum] : state) {
+    for (auto& [checksum, path] : state) {
         move_artifact(prov_artifacts_path, checksum, path);
     }
 }

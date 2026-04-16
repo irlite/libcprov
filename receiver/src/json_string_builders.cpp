@@ -198,3 +198,51 @@ std::string convert_db_interface_data_to_json(
         }
     }
 }
+
+std::string wrap_retriever_json(std::string payload, bool status) {
+    return std::string(R"({"status":)") + (status ? "0" : "1") +
+           R"(,"payload":)" + payload + "}";
+}
+
+std::string build_exec_operations_json(
+    const std::unordered_map<
+        uint64_t, std::unordered_map<std::string, Operations>>& exec_map) {
+    std::unordered_map<std::string, std::string> exec_json_map;
+    for (const auto& [exec_id, file_map] : exec_map) {
+        std::unordered_map<std::string, std::string> file_json_map;
+        for (const auto& [path, ops] : file_map) {
+            std::vector<std::string> op_array;
+            if (ops.read) op_array.push_back(R"("read")");
+            if (ops.write) op_array.push_back(R"("write")");
+            if (ops.deleted) op_array.push_back(R"("deleted")");
+            file_json_map[path] =
+                R"({"performed_operations":)" + build_json_array(op_array) +
+                R"(,"start_checksum":")" + ops.start_checksum +
+                R"(","end_checksum":")" + ops.end_checksum + R"("})";
+        }
+        exec_json_map[std::to_string(exec_id)] =
+            build_json_object(file_json_map, false);
+    }
+    return R"({"exec_operations_map":)" +
+           build_json_object(exec_json_map, false) + R"(})";
+}
+
+std::string convert_retriever_data_to_json(DBRetrieverData db_retriever_data) {
+    switch (db_retriever_data.request_type) {
+        case RetrieverRequestType::Job:
+        case RetrieverRequestType::ExecId: {
+            const auto& exec_map = std::get<std::unordered_map<
+                uint64_t, std::unordered_map<std::string, Operations>>>(
+                db_retriever_data.operations_by_exec);
+            std::string payload = build_exec_operations_json(exec_map);
+            return wrap_retriever_json(payload, true);
+        }
+        case RetrieverRequestType::Checksum: {
+            bool exists = std::get<bool>(db_retriever_data.operations_by_exec);
+            std::string payload = R"({"content":{"checksum_exists":)" +
+                                  std::string(exists ? "1" : "0") + R"(}})";
+            return wrap_retriever_json(payload, true);
+        }
+    }
+    return wrap_retriever_json(R"({"error_message":"error"})", false);
+}

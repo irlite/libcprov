@@ -229,14 +229,14 @@ ParsedInjectorData parse_injector_data(const std::string& request_body) {
 }
 
 //--- GRAPH ---
-ParsedGraphRequestData parse_graph_request_data(std::string request_body) {
+JobIdentifier parse_graph_request_data(std::string request_body) {
     ondemand::parser parser;
     padded_string padded_request_body_string(request_body);
     auto doc_res = parser.iterate(padded_request_body_string);
     auto doc = doc_res.get_object().value();
     uint64_t job_id = get_uint64(doc, "job_id");
     std::string cluster_name = get_string(doc, "cluster_name");
-    return ParsedGraphRequestData{job_id, cluster_name};
+    return JobIdentifier{job_id, cluster_name};
 }
 
 //--- DB_INTERFACE ---
@@ -344,4 +344,49 @@ ParsedDBInterfaceRequestData parse_db_interface_request_data(
         }
     }
     throw std::runtime_error("unknown request_type");
+}
+
+// Retriever
+RetrieverRequestType get_retriever_request_type(
+    const std::string& request_type_string) {
+    if (request_type_string == "job") return RetrieverRequestType::Job;
+    if (request_type_string == "exec_id") return RetrieverRequestType::ExecId;
+    if (request_type_string == "checksum")
+        return RetrieverRequestType::Checksum;
+}
+
+ParsedRetrieverData parse_retriever_data(std::string request_body) {
+    simdjson::ondemand::parser parser;
+    simdjson::padded_string json(request_body);
+    auto doc = parser.iterate(json);
+    simdjson::ondemand::object root = doc.get_object().value();
+    ParsedRetrieverData parsed_retriever_data;
+    std::string request_type_string =
+        get_string(root, "retriever_request_type");
+    RetrieverRequestType request_type =
+        get_retriever_request_type(request_type_string);
+    parsed_retriever_data.request_type = request_type;
+    simdjson::ondemand::object payload = root["payload"].get_object().value();
+    switch (request_type) {
+        case RetrieverRequestType::Job: {
+            JobIdentifier job_identifier;
+            job_identifier.job_id = get_uint64(payload, "job_id");
+            job_identifier.cluster_name = get_string(payload, "cluster");
+
+            parsed_retriever_data.parsed_retriever_request = job_identifier;
+            break;
+        }
+        case RetrieverRequestType::ExecId: {
+            uint64_t exec_id = get_uint64(payload, "exec_id");
+
+            parsed_retriever_data.parsed_retriever_request = exec_id;
+            break;
+        }
+        case RetrieverRequestType::Checksum: {
+            std::string checksum = get_string(payload, "checksum");
+            parsed_retriever_data.parsed_retriever_request = checksum;
+            break;
+        }
+    }
+    return parsed_retriever_data;
 }

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <optional>
 #include <string>
 
 #include "model.hpp"
 
 ParsedInjectorData parse_injector_data(const std::string&);
-ParsedGraphRequestData parse_graph_request_data(std::string request_body);
+JobIdentifier parse_graph_request_data(std::string request_body);
 ParsedDBInterfaceRequestData parse_db_interface_request_data(
     std::string request_body);
+ParsedRetrieverData parse_retriever_data(std::string request_body);

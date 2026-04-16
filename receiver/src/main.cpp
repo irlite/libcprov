@@ -58,7 +58,7 @@ int main() {
             std::cerr << "[http] POST /graph_api size=" << req.body.size()
                       << "\n";
             std::cerr << req.body << "\n";
-            ParsedGraphRequestData parsed_graph_request_data =
+            JobIdentifier parsed_graph_request_data =
                 parse_graph_request_data(std::move(req.body));
             JobData job_data =
                 fetch_graph_db_data(std::move(parsed_graph_request_data));
@@ -81,7 +81,13 @@ int main() {
         [&](const httplib::Request& req, httplib::Response& res) {
             std::cerr << "[http] POST /retriever_api size=" << req.body.size()
                       << "\n";
-            // res.set_content(json_response_data, "application/json");
+            ParsedRetrieverData parsed_retriever_data =
+                parse_retriever_data(std::move(req.body));
+            DBRetrieverData db_retriever_data =
+                fetch_retriever_db_data(std::move(parsed_retriever_data));
+            std::string json_response_data =
+                convert_retriever_data_to_json(std::move(db_retriever_data));
+            res.set_content(json_response_data, "application/json");
         });
     server.run(4);
     return 0;

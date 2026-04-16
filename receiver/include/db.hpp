@@ -59,6 +59,11 @@ class DB {
                                      bool add_files);
     std::unordered_map<std::string, Operations> read_operation_map(
         sqlite3* db, uint64_t process_id);
+    std::unordered_map<uint64_t, std::unordered_map<std::string, Operations>>
+    fetch_job_operations(uint64_t job_id, const std::string& cluster_name);
+    JobIdentifier fetch_job_identifier_from_exec_id(
+        uint64_t parsed_retriever_request);
+    bool check_if_checksum_exists(std::string checksum);
     sqlite3* open_db();
     void close_db(sqlite3* db);
 

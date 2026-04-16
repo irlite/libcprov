@@ -20,20 +20,19 @@ static uint64_t get_uint64(ondemand::object& obj, const char* name) {
     return result.value();
 }
 
-OperationMap parse_exec_operations(ondemand::object& json_operation_map) {
+OperationMap parse_exec_operations(ondemand::object json_operation_map) {
     OperationMap operation_map;
     for (auto json_operation_mapping : json_operation_map) {
         std::string_view path_sv;
         json_operation_mapping.unescaped_key().get(path_sv);
         std::string path(path_sv);
         ondemand::object json_operation_mapping_object =
-            json_operation_mapping.value().get_object().value();
+            json_operation_mapping.value().get_object();
         Operations& ops = operation_map[path];
         auto performed_ops_val =
             json_operation_mapping_object
                 .find_field_unordered("performed_operations")
-                .get_array()
-                .value();
+                .get_array();
         for (auto op_val : performed_ops_val) {
             std::string_view op_sv;
             op_val.get_string().get(op_sv);
@@ -57,14 +56,14 @@ OperationMap parse_exec_operations(ondemand::object& json_operation_map) {
 OrderedOperationsPerExecs parse_job_or_exec_retrieval_data(
     ondemand::object content_object) {
     ondemand::object exec_operations_map =
-        content_object["exec_operations_map"].get_object().value();
+        content_object["exec_operations_map"].get_object();
     std::unordered_map<uint64_t, OperationMap> exec_operations_by_id;
     for (auto exec_operations_mapping : exec_operations_map) {
-        std::string_view path_sv;
-        exec_operations_mapping.unescaped_key().get(path_sv);
-        uint64_t exec_id = std::stoull(std::string(path_sv));
+        std::string_view exec_id_sv;
+        exec_operations_mapping.unescaped_key().get(exec_id_sv);
+        uint64_t exec_id = std::stoull(std::string(exec_id_sv));
         ondemand::object json_operation_mapping_object =
-            exec_operations_mapping.value().get_object().value();
+            exec_operations_mapping.value().get_object();
         exec_operations_by_id[exec_id] =
             parse_exec_operations(json_operation_mapping_object);
     }
@@ -82,11 +81,9 @@ ParsedRetrieverBackendResponse parse_retriever_backend_response(
     padded_string padded_response_body_string(response_body);
     auto response_document_result =
         response_parser.iterate(padded_response_body_string);
-    ondemand::object root_object =
-        response_document_result.get_object().value();
-    ondemand::object content_object =
-        root_object["content"].get_object().value();
+    ondemand::object root_object = response_document_result.get_object();
     uint64_t status = get_uint64(root_object, "status");
+    ondemand::object content_object = root_object["payload"].get_object();
     if (status != 0) {
         parsed_retriever_backend_response.success = false;
         parsed_retriever_backend_response.error_message =

@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <unordered_set>
 
 #include "db.hpp"
 #include "model.hpp"
@@ -107,7 +108,7 @@ void save_db_data(DB& db, const ParsedInjectorData& parsed_injector_data) {
     }
 }
 
-JobData fetch_graph_db_data(ParsedGraphRequestData parsed_graph_request_data) {
+JobData fetch_graph_db_data(JobIdentifier parsed_graph_request_data) {
     DB db = DB();
     return db.get_job_data(parsed_graph_request_data.job_id,
                            parsed_graph_request_data.cluster_name);
@@ -181,4 +182,38 @@ DBInterfaceData fetch_db_interface_db_data(
     }
     db.close_db(sqlite3_db);
     return db_interface_data;
+}
+
+DBRetrieverData fetch_retriever_db_data(
+    ParsedRetrieverData parsed_retriever_data) {
+    std::variant<JobIdentifier, uint64_t, std::string>
+        parsed_retriever_request =
+            parsed_retriever_data.parsed_retriever_request;
+    DBRetrieverData db_retriever_data;
+    RetrieverRequestType retriever_request_type =
+        parsed_retriever_data.request_type;
+    db_retriever_data.request_type = retriever_request_type;
+    DB db = DB();
+    switch (retriever_request_type) {
+        case (RetrieverRequestType::Job): {
+            JobIdentifier job_identifier =
+                std::get<JobIdentifier>(parsed_retriever_request);
+            db_retriever_data.operations_by_exec = db.fetch_job_operations(
+                job_identifier.job_id, job_identifier.cluster_name);
+            break;
+        }
+        case (RetrieverRequestType::ExecId): {
+            JobIdentifier job_identifier = db.fetch_job_identifier_from_exec_id(
+                std::get<uint64_t>(parsed_retriever_request));
+            db_retriever_data.operations_by_exec = db.fetch_job_operations(
+                job_identifier.job_id, job_identifier.cluster_name);
+            break;
+        }
+        case (RetrieverRequestType::Checksum): {
+            db_retriever_data.operations_by_exec = db.check_if_checksum_exists(
+                std::get<std::string>(parsed_retriever_request));
+            break;
+        }
+    }
+    return db_retriever_data;
 }
