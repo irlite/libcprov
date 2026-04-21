@@ -9,6 +9,7 @@ include(FetchContent)
 
 # ------------------ Fetch Dependencies ------------------
 # simdjson (build from source, pinned to specific commit)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 FetchContent_Declare(
     simdjson
     GIT_REPOSITORY https://github.com/simdjson/simdjson.git
