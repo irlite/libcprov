@@ -12,6 +12,19 @@ for arg in "$@"; do
     esac
 done
 
+BUILD_MODE="normal"
+
+for arg in "$@"; do
+    case "$arg" in
+        -c|--clean)
+            rm -rf -- build
+            ;;
+        -p|--perf)
+            BUILD_MODE="perf"
+            ;;
+    esac
+done
+
 mkdir -p build
 pushd build
 
@@ -22,13 +35,19 @@ if type module &>/dev/null; then
     export LDFLAGS="-ldl"
 fi
 
-ASAN_FLAGS="-fsanitize=address -fno-omit-frame-pointer -g3"
+if [[ "$BUILD_MODE" == "perf" ]]; then
+    EXTRA_FLAGS="-fno-omit-frame-pointer -g3 -O2"
+else
+    EXTRA_FLAGS="-g -O0"
+fi
 
 cmake .. \
-  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_CXX_STANDARD=23 \
   -DCMAKE_CXX_STANDARD_REQUIRED=ON \
   -DCMAKE_CXX_EXTENSIONS=ON \
+  -DCMAKE_C_FLAGS="${EXTRA_FLAGS}" \
+  -DCMAKE_CXX_FLAGS="${EXTRA_FLAGS}"
 
 cmake --build . -- -j"$(nproc)"
 popd

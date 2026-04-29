@@ -41,3 +41,32 @@ target_link_libraries(injector PRIVATE
     pthread
     dl
 )
+# -------- Injector Dummy Shared Library --------
+add_library(injector_dummy SHARED
+    src/injector_dummy.cpp
+)
+
+target_link_libraries(injector_dummy PRIVATE
+    pthread
+    dl
+)
+
+# -------- Injector No Mutex Shared Library --------
+add_library(injector_no_mutex SHARED
+    src/injector_no_mutex.cpp
+)
+
+target_link_libraries(injector_no_mutex PRIVATE
+    pthread
+    dl
+)
+
+# -------- Injector No FD Path Resolution Shared Library --------
+add_library(injector_no_path SHARED
+    src/injector_no_path.cpp
+)
+
+target_link_libraries(injector_no_path PRIVATE
+    pthread
+    dl
+)

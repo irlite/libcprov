@@ -1,0 +1,16 @@
+[global]
+ioengine=psync
+direct=1
+bs=4k
+size=1g
+runtime=30
+time_based=1
+group_reporting
+
+[read-test]
+rw=randread
+filename=/tmp/testfile
+
+[write-test]
+rw=randwrite
+filename=/tmp/testfile

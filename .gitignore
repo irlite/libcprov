@@ -46,6 +46,12 @@ config/cmake_install.cmake
 config/Makefile
 config/config.json
 config/CMakeFiles/
+benchmarking/results/
+benchmarking/perf.data
+benchmarking/perf.data.old
+benchmarking/syscall_overhead/syscall_overhead
+benchmarking/syscall_overhead/syscall_without_preload.log
+benchmarking/syscall_overhead/syscall_with_preload.log
 model_graphs/*
 !model_graphs/
 !model_graphs/database_model.dot
