@@ -448,6 +448,7 @@ std::vector<ExecData> DB::read_execs(sqlite3* db, uint64_t job_id,
             exec.process_map_db = read_processes(db, exec_id, true);
             exec.env_variables_hash_to_variables =
                 read_env_pairs_for_exec(db, exec_id);
+            exec.execute_set_map_db = read_execute_set_map(db, exec_id);
         } else if (add_processes || add_files) {
             exec.process_map_db = read_processes(db, exec_id, add_files);
             exec.execute_set_map_db = read_execute_set_map(db, exec_id);

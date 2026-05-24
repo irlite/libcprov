@@ -28,6 +28,12 @@ ProcessedExecData extract_injector_data(
     return processed_exec_data;
 }
 
+void ensure_path_exists(const std::string& path) {
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directories(path);
+    }
+}
+
 enum class Mode { Start, End, Exec };
 
 struct StartOpts {
@@ -128,6 +134,7 @@ int main(int argc, char** argv) {
                 build_header("exec", path_access, job_id, cluster_name);
             ExecOpts exec_opts = std::get<ExecOpts>(parsed.opts);
             std::string exec_path = exec_opts.path;
+            ensure_path_exists(exec_path);
             std::string absolute_path_exec =
                 std::filesystem::canonical(exec_path).string();
             auto [excluded_files, excluded_dirs] =
@@ -138,12 +145,10 @@ int main(int argc, char** argv) {
                                         excluded_files);
             process_files(db, config.prov_artifacts_path,
                           original_checksums_by_files);
-            std::string exec_json_input = exec_opts.json;
             std::string exec_command = exec_opts.command;
             std::string injector_data_path = path_access;
             set_env_variables(absolute_path_exec, injector_data_path);
-            std::string injector_path = config.injector_path;
-            start_preload_process(injector_path, exec_command,
+            start_preload_process(config.injector_path, exec_command,
                                   injector_data_path);
             ProcessedExecData processed_exec_data = extract_injector_data(
                 injector_data_path, original_checksums_by_files);
@@ -157,7 +162,7 @@ int main(int argc, char** argv) {
                           new_checksums_by_files);
             close_db_connection(db);
             std::string exec_json_output = build_exec_json_output(
-                absolute_path_exec, exec_json_input, exec_command,
+                absolute_path_exec, exec_opts.json, exec_command,
                 std::move(processed_exec_data));
             send_json(endpoint_url, header, exec_json_output);
             break;

@@ -117,6 +117,7 @@ ExecuteSetMap resolve_exec(Event exec_event, LinuxProcessMap& linux_process_map,
             potential_child_process.start_time > exec_event.ts) {
             execute_set_map[exec_event.process_id].insert(
                 potential_child_process.process_id);
+            break;
         }
     }
     return execute_set_map;
@@ -153,9 +154,10 @@ void log_process_start(Event event, ProcessedExecData& processed_exec_data) {
             [process_start.env_variables_hash.value()] =
             process_start.env_variables;
         std::string::size_type first_space_pos = process_name.find(' ');
-        std::string executable = (first_space_pos == std::string::npos)
+        /*std::string executable = (first_space_pos == std::string::npos)
                                      ? process_name
-                                     : process_name.substr(0, first_space_pos);
+                                     : process_name.substr(0,
+           first_space_pos);*/
         // operations_data_backup_format[executable] =
         //     BackupOperations{.read = false, .write = false, .execute = true};
     }
@@ -215,13 +217,19 @@ void log_rename(const Event& event, ProcessedExecData& processed_exec_data) {
     // processed_exec_data.process_map[process_id].operation_map[path];
 };
 
-std::string get_checksum(ChecksumsByFiles& original_checksums_by_files,
-                         std::unordered_set<std::string>& seen_files,
-                         const std::string& path) {
-    if (!seen_files.contains(path)) {
-        seen_files.insert(path);
-        if (original_checksums_by_files.contains(path)) {
-            return original_checksums_by_files[path];
+std::string get_checksum(
+    ChecksumsByFiles& original_checksums_by_files,
+    std::unordered_set<std::string>& seen_files, const std::string& path,
+    std::unordered_map<std::string, std::string>& rename_map) {
+    std::string resolved_path = path;
+    auto it = rename_map.find(path);
+    if (it != rename_map.end()) {
+        resolved_path = it->second;
+    }
+    if (!seen_files.contains(resolved_path)) {
+        seen_files.insert(resolved_path);
+        if (original_checksums_by_files.contains(resolved_path)) {
+            return original_checksums_by_files[resolved_path];
         }
     }
     return "";
@@ -236,13 +244,13 @@ ProcessedExecData process_events(EventsByFile& events_by_file,
     std::unordered_map<std::string, std::stack<Event>> enqueued_execs;
     ProcessedExecData processed_exec_data;
     std::unordered_set<std::string> seen_files;
-    bool file_already_seen;
+    // bool file_already_seen;
     std::string checksum;
     for (const Event& event : events) {
         checksum = "";
         SysOp op = event.operation;
         const EventPayload& payload = event.event_payload;
-        file_already_seen = true;
+        // file_already_seen = true;
         switch (op) {
             case SysOp::ProcessStart: {
                 log_process_start(event, processed_exec_data);
@@ -254,10 +262,12 @@ ProcessedExecData process_events(EventsByFile& events_by_file,
                 const std::string& path =
                     std::get<std::string>(event.event_payload);
                 std::string process_id = event.process_id;
-                if (!seen_files.contains(path)) {
+                /*if (!seen_files.contains(path)) {
                     seen_files.insert(path);
                     checksum = original_checksums_by_files[path];
-                }
+                }*/
+                checksum = get_checksum(original_checksums_by_files, seen_files,
+                                        path, processed_exec_data.rename_map);
                 log_operation(path, process_id, processed_exec_data, op,
                               checksum);
                 break;
@@ -266,10 +276,13 @@ ProcessedExecData process_events(EventsByFile& events_by_file,
                 const Transfer& transfer =
                     std::get<Transfer>(event.event_payload);
                 const std::string& path_read = transfer.path_read;
-                if (!seen_files.contains(path_read)) {
+                /*if (!seen_files.contains(path_read)) {
                     seen_files.insert(path_read);
                     checksum = original_checksums_by_files[path_read];
-                }
+                }*/
+                checksum =
+                    get_checksum(original_checksums_by_files, seen_files,
+                                 path_read, processed_exec_data.rename_map);
                 log_operation(path_read, event.process_id, processed_exec_data,
                               SysOp::Read, checksum);
                 log_operation(transfer.path_write, event.process_id,

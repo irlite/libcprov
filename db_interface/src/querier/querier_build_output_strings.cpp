@@ -1,6 +1,7 @@
 #include <unistd.h>
 
 #include <cstdlib>
+#include <ctime>
 #include <string>
 #include <string_view>
 
@@ -20,6 +21,15 @@ static std::string c_bold(bool enable) { return enable ? "\033[1m" : ""; }
 static std::string c_blue(bool enable) { return enable ? "\033[34m" : ""; }
 static std::string c_green(bool enable) { return enable ? "\033[32m" : ""; }
 static std::string c_yellow(bool enable) { return enable ? "\033[33m" : ""; }
+
+static std::string format_timestamp(uint64_t ts_ns) {
+    time_t ts_sec = static_cast<time_t>(ts_ns / 1000000000ULL);
+    struct tm tm_info;
+    localtime_r(&ts_sec, &tm_info);
+    char buf[32];
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm_info);
+    return std::string(buf);
+}
 
 static std::string get_operations_string(const FileOperations& file_operations,
                                          bool color_enabled) {
@@ -60,18 +70,15 @@ std::string get_jobs_query_output_string(ParsedQuery parsed_query) {
             "\n" + "├── " +
             format_kv("cluster", parsed_jobs_query_data.cluster_name,
                       color_enabled) +
-            "\n" + "├── " +
-            format_kv("user", parsed_jobs_query_data.username, color_enabled) +
+            "\n" + "├── " + format_kv("user", "example_user", color_enabled) +
             "\n" + "├── " +
             format_kv("start",
-                      std::to_string(parsed_jobs_query_data.start_time),
+                      format_timestamp(parsed_jobs_query_data.start_time),
                       color_enabled) +
             "\n" + "├── " +
-            format_kv("end", std::to_string(parsed_jobs_query_data.end_time),
+            format_kv("end", format_timestamp(parsed_jobs_query_data.end_time),
                       color_enabled) +
             "\n" + "├── " +
-            format_kv("path", parsed_jobs_query_data.path, color_enabled) +
-            "\n" + "└── " +
             format_kv("json", parsed_jobs_query_data.json, color_enabled) +
             "\n";
     }
@@ -90,7 +97,7 @@ std::string get_execs_query_output_string(ParsedQuery parsed_query) {
                       color_enabled) +
             "\n" + "├── " +
             format_kv("start",
-                      std::to_string(parsed_execs_query_data.start_time),
+                      format_timestamp(parsed_execs_query_data.start_time),
                       color_enabled) +
             "\n" + "├── " +
             format_kv("path", parsed_execs_query_data.path, color_enabled) +
