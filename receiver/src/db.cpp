@@ -32,7 +32,6 @@ void DB::build_tables() {
         "  username TEXT NOT NULL,"
         "  start_time INTEGER NOT NULL,"
         "  end_time INTEGER NOT NULL,"
-        "  path TEXT NOT NULL,"
         "  json TEXT NOT NULL,"
         "  PRIMARY KEY (job_id, cluster_name)"
         ");"
@@ -64,14 +63,9 @@ void DB::build_tables() {
         "    ON UPDATE CASCADE"
         ");"
         "CREATE TABLE IF NOT EXISTS execute_mappings ("
-        "  exec_id INTEGER NOT NULL,"
         "  parent_process_id INTEGER NOT NULL,"
         "  child_process_id INTEGER NOT NULL,"
-        "  PRIMARY KEY (exec_id, parent_process_id, child_process_id),"
-        "  FOREIGN KEY (exec_id)"
-        "    REFERENCES execs(exec_id)"
-        "    ON DELETE CASCADE"
-        "    ON UPDATE CASCADE,"
+        "  PRIMARY KEY (parent_process_id, child_process_id),"
         "  FOREIGN KEY (parent_process_id)"
         "    REFERENCES processes(process_id)"
         "    ON DELETE CASCADE"
@@ -121,8 +115,8 @@ void DB::init_job(uint64_t job_id, const std::string& cluster_name) {
                  nullptr);
     sqlite3_prepare_v2(job_db_context.db,
                        "INSERT INTO jobs(job_id, cluster_name, job_name, "
-                       "username, start_time, end_time, path, json) "
-                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+                       "username, start_time, end_time, json) "
+                       "VALUES (?, ?, ?, ?, ?, ?, ?);",
                        -1, &job_db_context.insert_job, nullptr);
     sqlite3_prepare_v2(job_db_context.db,
                        "UPDATE jobs SET end_time = ? WHERE job_id = ? AND "
@@ -139,8 +133,8 @@ void DB::init_job(uint64_t job_id, const std::string& cluster_name) {
                        "(?, ?, ?);",
                        -1, &job_db_context.insert_process, nullptr);
     sqlite3_prepare_v2(job_db_context.db,
-                       "INSERT INTO execute_mappings(exec_id, "
-                       "parent_process_id, child_process_id) VALUES (?, ?, ?);",
+                       "INSERT INTO execute_mappings(parent_process_id, "
+                       "child_process_id) VALUES (?, ?);",
                        -1, &job_db_context.insert_execute_mapping, nullptr);
     sqlite3_prepare_v2(
         job_db_context.db,
@@ -179,8 +173,7 @@ void DB::commit_job() {
 }
 void DB::add_job(uint64_t job_id, const std::string& cluster_name,
                  uint64_t start_time, const std::string& job_name,
-                 const std::string& username, const std::string& path,
-                 const std::string& json) {
+                 const std::string& username, const std::string& json) {
     sqlite3_bind_int64(current_job_.insert_job, 1, job_id);
     sqlite3_bind_text(current_job_.insert_job, 2, cluster_name.c_str(), -1,
                       SQLITE_TRANSIENT);
@@ -190,9 +183,7 @@ void DB::add_job(uint64_t job_id, const std::string& cluster_name,
                       SQLITE_TRANSIENT);
     sqlite3_bind_int64(current_job_.insert_job, 5, start_time);
     sqlite3_bind_int64(current_job_.insert_job, 6, -1);
-    sqlite3_bind_text(current_job_.insert_job, 7, path.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(current_job_.insert_job, 8, json.c_str(), -1,
+    sqlite3_bind_text(current_job_.insert_job, 7, json.c_str(), -1,
                       SQLITE_TRANSIENT);
     sqlite3_step(current_job_.insert_job);
     sqlite3_reset(current_job_.insert_job);
@@ -237,12 +228,11 @@ uint64_t DB::add_process(uint64_t exec_id, const std::string& launch_command,
     sqlite3_clear_bindings(current_job_.insert_process);
     return process_id;
 }
-void DB::add_execute_mapping(uint64_t exec_id, uint64_t parent_process_id,
+void DB::add_execute_mapping(uint64_t parent_process_id,
                              uint64_t child_process_id) {
-    sqlite3_bind_int64(current_job_.insert_execute_mapping, 1, exec_id);
-    sqlite3_bind_int64(current_job_.insert_execute_mapping, 2,
+    sqlite3_bind_int64(current_job_.insert_execute_mapping, 1,
                        parent_process_id);
-    sqlite3_bind_int64(current_job_.insert_execute_mapping, 3,
+    sqlite3_bind_int64(current_job_.insert_execute_mapping, 2,
                        child_process_id);
     sqlite3_step(current_job_.insert_execute_mapping);
     sqlite3_reset(current_job_.insert_execute_mapping);
@@ -356,8 +346,10 @@ ExecuteSetMapDB DB::read_execute_set_map(sqlite3* db, uint64_t exec_id) {
     sqlite3_stmt* st = nullptr;
     sqlite3_prepare_v2(
         db,
-        "SELECT parent_process_id, child_process_id FROM execute_mappings "
-        "WHERE exec_id=? ORDER BY parent_process_id, child_process_id;",
+        "SELECT em.parent_process_id, em.child_process_id FROM "
+        "execute_mappings em "
+        "JOIN processes p ON p.process_id = em.parent_process_id "
+        "WHERE p.exec_id=? ORDER BY em.parent_process_id, em.child_process_id;",
         -1, &st, nullptr);
     sqlite3_bind_int64(st, 1, (sqlite3_int64)exec_id);
     while (sqlite3_step(st) == SQLITE_ROW) {
@@ -460,15 +452,12 @@ std::vector<ExecData> DB::read_execs(sqlite3* db, uint64_t job_id,
 JobData DB::get_job_data(uint64_t job_id, const std::string& cluster_name) {
     JobData out{};
     out.succeded = false;
-    /*sqlite3* db = nullptr;
-    sqlite3_open(db_file_.c_str(), &db);*/
     sqlite3* db = this->open_db();
     sqlite3_stmt* st = nullptr;
-    sqlite3_prepare_v2(
-        db,
-        "SELECT job_name, username, start_time, end_time, path, json "
-        "FROM jobs WHERE job_id=? AND cluster_name=?;",
-        -1, &st, nullptr);
+    sqlite3_prepare_v2(db,
+                       "SELECT job_name, username, start_time, end_time, json "
+                       "FROM jobs WHERE job_id=? AND cluster_name=?;",
+                       -1, &st, nullptr);
     sqlite3_bind_int64(st, 1, (sqlite3_int64)job_id);
     sqlite3_bind_text(st, 2, cluster_name.c_str(), -1, SQLITE_TRANSIENT);
     if (sqlite3_step(st) == SQLITE_ROW) {
@@ -477,8 +466,7 @@ JobData DB::get_job_data(uint64_t job_id, const std::string& cluster_name) {
         out.username = col_text(st, 1);
         out.start_time = col_u64(st, 2);
         out.end_time = col_u64(st, 3);
-        out.path = col_text(st, 4);
-        out.json = col_text(st, 5);
+        out.json = col_text(st, 4);
         out.exec_data_vector =
             read_execs(db, job_id, cluster_name, true, false, false);
     }
@@ -496,7 +484,7 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
         sqlite3_prepare_v2(
             db,
             "SELECT job_id, cluster_name, job_name, username, start_time, "
-            "end_time, path, json "
+            "end_time, json "
             "FROM jobs WHERE username=? AND start_time>=? AND end_time<=?;",
             -1, &st, nullptr);
         sqlite3_bind_text(st, 1, user.c_str(), -1, SQLITE_TRANSIENT);
@@ -506,7 +494,7 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
         sqlite3_prepare_v2(
             db,
             "SELECT job_id, cluster_name, job_name, username, start_time, "
-            "end_time, path, json "
+            "end_time, json "
             "FROM jobs WHERE username=? AND start_time>=?;",
             -1, &st, nullptr);
         sqlite3_bind_text(st, 1, user.c_str(), -1, SQLITE_TRANSIENT);
@@ -515,7 +503,7 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
         sqlite3_prepare_v2(
             db,
             "SELECT job_id, cluster_name, job_name, username, start_time, "
-            "end_time, path, json "
+            "end_time, json "
             "FROM jobs WHERE username=? AND end_time<=?;",
             -1, &st, nullptr);
         sqlite3_bind_text(st, 1, user.c_str(), -1, SQLITE_TRANSIENT);
@@ -524,7 +512,7 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
         sqlite3_prepare_v2(
             db,
             "SELECT job_id, cluster_name, job_name, username, start_time, "
-            "end_time, path, json "
+            "end_time, json "
             "FROM jobs WHERE username=?;",
             -1, &st, nullptr);
         sqlite3_bind_text(st, 1, user.c_str(), -1, SQLITE_TRANSIENT);
@@ -538,12 +526,10 @@ JobInterfaceDataRows DB::get_job_interface_data(sqlite3* db, std::string user,
         job_data_interface.username = col_text(st, 3);
         job_data_interface.start_time = col_u64(st, 4);
         job_data_interface.end_time = col_u64(st, 5);
-        job_data_interface.path = col_text(st, 6);
-        job_data_interface.json = col_text(st, 7);
+        job_data_interface.json = col_text(st, 6);
         job_data_interface_rows.push_back(job_data_interface);
     }
     sqlite3_finalize(st);
-    // sqlite3_close(db);
     return job_data_interface_rows;
 }
 

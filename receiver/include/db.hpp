@@ -18,8 +18,7 @@ class DB {
     void commit_job();
     void add_job(uint64_t job_id, const std::string& cluster_name,
                  uint64_t start_time, const std::string& job_name,
-                 const std::string& username, const std::string& path,
-                 const std::string& json);
+                 const std::string& username, const std::string& json);
     void set_job_end_time(uint64_t job_id, const std::string& cluster_name,
                           uint64_t end_time);
     uint64_t add_exec(uint64_t job_id, const std::string& cluster_name,
@@ -27,7 +26,7 @@ class DB {
                       const std::string& json, const std::string& command);
     uint64_t add_process(uint64_t exec_id, const std::string& launch_command,
                          uint64_t env_variables_hash);
-    void add_execute_mapping(uint64_t exec_id, uint64_t parent_process_id,
+    void add_execute_mapping(uint64_t parent_process_id,
                              uint64_t child_process_id);
     void add_operations(uint64_t process_id, const std::string& path, bool read,
                         bool write, bool deleted,

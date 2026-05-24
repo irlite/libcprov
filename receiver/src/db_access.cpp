@@ -18,7 +18,7 @@ std::unordered_map<std::string, uint64_t> add_processes(
 }
 
 void add_execute_mappings(
-    DB& db, uint64_t exec_id, const ExecuteSetMap& execute_set_map,
+    DB& db, const ExecuteSetMap& execute_set_map,
     std::unordered_map<std::string, uint64_t> process_id_to_process_db_id) {
     for (auto& [parent_process_id, child_process_ids] : execute_set_map) {
         uint64_t parent_process_db_id =
@@ -26,8 +26,7 @@ void add_execute_mappings(
         uint64_t child_process_db_id;
         for (std::string child_process_id : child_process_ids) {
             child_process_db_id = process_id_to_process_db_id[child_process_id];
-            db.add_execute_mapping(exec_id, parent_process_db_id,
-                                   child_process_db_id);
+            db.add_execute_mapping(parent_process_db_id, child_process_db_id);
         }
     }
 }
@@ -82,7 +81,7 @@ void save_db_data(DB& db, const ParsedInjectorData& parsed_injector_data) {
             std::string path_start = start_data.path;
             db.set_current_job(job_id, cluster_name);
             db.add_job(job_id, cluster_name, timestamp, start_data.job_name,
-                       start_data.username, path_start, json_start);
+                       start_data.username, json_start);
             db.commit_job();
             break;
         }
@@ -100,7 +99,7 @@ void save_db_data(DB& db, const ParsedInjectorData& parsed_injector_data) {
                     add_processes(db, exec_id, exec_data.process_map);
             add_operations(db, exec_id, exec_data.process_map,
                            process_id_to_process_db_id);
-            add_execute_mappings(db, exec_id, exec_data.execute_set_map,
+            add_execute_mappings(db, exec_data.execute_set_map,
                                  process_id_to_process_db_id);
             add_renames(db, exec_id, exec_data.rename_map);
             db.commit_job();
