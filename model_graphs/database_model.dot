@@ -21,7 +21,6 @@ digraph G {
       <TR><TD PORT="L_username" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>username</B></TD><TD>TEXT</TD><TD PORT="R_username" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
       <TR><TD PORT="L_start_time" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>start_time</B></TD><TD>INTEGER</TD><TD PORT="R_start_time" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
       <TR><TD PORT="L_end_time" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>end_time</B></TD><TD>INTEGER</TD><TD PORT="R_end_time" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
-      <TR><TD PORT="L_path" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>path</B></TD><TD>TEXT</TD><TD PORT="R_path" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
       <TR><TD PORT="L_json" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>json</B></TD><TD>TEXT</TD><TD PORT="R_json" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
     </TABLE>
   > ];
@@ -65,6 +64,8 @@ digraph G {
       <TR><TD PORT="L_read" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>read</B></TD><TD>INTEGER</TD><TD PORT="R_read" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
       <TR><TD PORT="L_write" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>write</B></TD><TD>INTEGER</TD><TD PORT="R_write" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
       <TR><TD PORT="L_deleted" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>deleted</B></TD><TD>INTEGER</TD><TD PORT="R_deleted" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
+      <TR><TD PORT="L_start_checksum" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>start_checksum</B></TD><TD>TEXT</TD><TD PORT="R_start_checksum" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
+      <TR><TD PORT="L_end_checksum" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD><TD><B>end_checksum</B></TD><TD>TEXT</TD><TD PORT="R_end_checksum" WIDTH="0" FIXEDSIZE="TRUE" BORDER="0" CELLPADDING="0"></TD></TR>
     </TABLE>
   > ];
 
@@ -77,7 +78,6 @@ digraph G {
     </TABLE>
   > ];
 
-  // --- edges (no arrow labels)
   execs:R_job_id -> jobs:L_job_id;
   execs:R_cluster_name -> jobs:L_cluster_name;
 

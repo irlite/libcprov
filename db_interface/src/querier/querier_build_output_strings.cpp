@@ -70,7 +70,8 @@ std::string get_jobs_query_output_string(ParsedQuery parsed_query) {
             "\n" + "├── " +
             format_kv("cluster", parsed_jobs_query_data.cluster_name,
                       color_enabled) +
-            "\n" + "├── " + format_kv("user", "example_user", color_enabled) +
+            "\n" + "├── " +
+            format_kv("user", parsed_jobs_query_data.username, color_enabled) +
             "\n" + "├── " +
             format_kv("start",
                       format_timestamp(parsed_jobs_query_data.start_time),

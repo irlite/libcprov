@@ -1,7 +1,11 @@
+#include <limits.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -19,6 +23,15 @@ static std::string format_ns_epoch(uint64_t ns_since_epoch) {
     localtime_r(&tt, &tm);
     char buf[64];
     std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return std::string(buf);
+}
+static std::string format_now_for_filename() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t tt = std::chrono::system_clock::to_time_t(now);
+    std::tm tm{};
+    localtime_r(&tt, &tm);
+    char buf[64];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H-%M-%S", &tm);
     return std::string(buf);
 }
 static std::string xml_escape(const std::string& s) {
@@ -500,8 +513,8 @@ static double measure_global_column_w_from(const GlobalSharedTables& tables,
     if (tables.empty()) return 0.0;
     double inner_max = estimate_text_w("shared across execs", st.char_w) + 10.0;
     for (const auto& t : tables)
-        inner_max = std::max(inner_max,
-                             measure_global_table_w(t.first, t.second, st));
+        inner_max =
+            std::max(inner_max, measure_global_table_w(t.first, t.second, st));
     double w = inner_max + st.exec_inner_pad * 2;
     return clamp(w, 0.0, st.global_max_col_w);
 }
@@ -534,7 +547,9 @@ static void draw_global_shared_tables(std::ostringstream& os, double x,
         if (i + 1 < tables.size()) cy += st.row_gap;
     }
 }
-static std::string build_svg(const JobData& job, const SvgStyle& st) {
+static std::string build_svg(const JobData& job, const std::string& job_id,
+                             const std::string& cluster_name,
+                             const SvgStyle& st) {
     auto execs = sorted_execs(job);
     std::vector<double> col_w(execs.size(), 0.0);
     std::vector<double> col_h(execs.size(), 0.0);
@@ -543,8 +558,8 @@ static std::string build_svg(const JobData& job, const SvgStyle& st) {
         col_h[i] = measure_exec_total_height(*execs[i], st);
     }
     GlobalSharedTables global_tables = compute_global_shared_tables(job);
-    double global_shared_h
-        = measure_global_shared_height_from(global_tables, st);
+    double global_shared_h =
+        measure_global_shared_height_from(global_tables, st);
     double global_col_w = measure_global_column_w_from(global_tables, st);
     double content_w = 0.0;
     for (size_t i = 0; i < col_w.size(); ++i) {
@@ -569,11 +584,10 @@ static std::string build_svg(const JobData& job, const SvgStyle& st) {
     double hy = st.page_pad;
     std::string start_s = format_ns_epoch(job.start_time);
     std::string end_s = format_ns_epoch(job.end_time);
-    svg_text(os, hx, hy + 16, "Job Name: " + job.job_name, st.fg, st.font_size,
-             "Helvetica", "bold");
-    // svg_text(os, hx, hy + 34, "User: " + job.username, st.fg, st.font_size,
-    //          "Helvetica");
-    svg_text(os, hx, hy + 34, "User: example_user", st.fg, st.font_size,
+    svg_text(os, hx, hy + 16,
+             "Job ID: " + job_id + " | Cluster: " + cluster_name, st.fg,
+             st.font_size, "Helvetica", "bold");
+    svg_text(os, hx, hy + 34, "User: " + job.username, st.fg, st.font_size,
              "Helvetica");
     svg_text(os, hx, hy + 52, "Start: " + start_s, st.fg, st.font_size,
              "Helvetica");
@@ -582,15 +596,17 @@ static std::string build_svg(const JobData& job, const SvgStyle& st) {
     svg_text(os, end_value_x, hy + 70, end_s, st.fg, st.font_size, "Helvetica");
     double header_text_w = 0.0;
     header_text_w = std::max(
-        header_text_w, estimate_text_w("Job Name: " + job.job_name, st.char_w));
+        header_text_w,
+        estimate_text_w("Job ID: " + job_id + " | Cluster: " + cluster_name,
+                        st.char_w));
     header_text_w = std::max(
         header_text_w, estimate_text_w("User: " + job.username, st.char_w));
     header_text_w = std::max(header_text_w,
                              estimate_text_w("Start: " + start_s, st.char_w));
     header_text_w = std::max(header_text_w,
                              std::max(estimate_text_w("End:", st.char_w),
-                                      estimate_text_w("Start: ", st.char_w)
-                                          + estimate_text_w(end_s, st.char_w)));
+                                      estimate_text_w("Start: ", st.char_w) +
+                                          estimate_text_w(end_s, st.char_w)));
     double lx = hx + header_text_w;
     double ly = hy + 4.0;
     double sw = 14.0;
@@ -663,7 +679,22 @@ void save_graph_to_file(const std::string& graph_string,
     out << graph_string;
     out.close();
 }
-void build_graph(const JobData& job_data) {
+static std::string build_graph_filename(const std::string& job_id,
+                                        const std::string& cluster_name) {
+    std::ostringstream oss;
+    oss << job_id << "_" << cluster_name << "_" << format_now_for_filename()
+        << ".svg";
+    return oss.str();
+}
+static std::string build_graph_output_path(const std::string& job_id,
+                                           const std::string& cluster_name) {
+    return (std::filesystem::current_path() /
+            build_graph_filename(job_id, cluster_name))
+        .string();
+}
+void build_graph(const JobData& job_data, const std::string& job_id,
+                 const std::string& cluster_name) {
     SvgStyle st;
-    save_graph_to_file(build_svg(job_data, st), "/dev/shm/libcprov/graph.svg");
+    save_graph_to_file(build_svg(job_data, job_id, cluster_name, st),
+                       build_graph_output_path(job_id, cluster_name));
 }

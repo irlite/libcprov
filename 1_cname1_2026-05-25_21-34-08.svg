@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="919.4" height="628" viewBox="0 0 919.4 628">
+<rect x="0" y="0" width="919.4" height="628" fill="#ffffff" />
+<text x="18" y="34" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">Job ID: 1 | Cluster: cname1</text>
+<text x="18" y="52" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">User: hyperion</text>
+<text x="18" y="70" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">Start: 2026-05-24 18:19:41</text>
+<text x="18" y="88" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">End:</text>
+<text x="49.7" y="88" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">2026-05-24 18:19:41</text>
+<rect x="209.7" y="22" width="402.8" height="64" fill="none" stroke="#000000" stroke-width="1" />
+<text x="221.7" y="40" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">Legend</text>
+<rect x="221.7" y="60" width="14" height="14" fill="#0072B2" stroke="#000000" stroke-width="1" />
+<text x="241.7" y="72" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">write</text>
+<rect x="297.2" y="60" width="14" height="14" fill="#D55E00" stroke="#000000" stroke-width="1" />
+<text x="317.2" y="72" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">read</text>
+<rect x="365.6" y="60" width="14" height="14" fill="#009E73" stroke="#000000" stroke-width="1" />
+<text x="385.6" y="72" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">delete</text>
+<rect x="448.2" y="60" width="14" height="14" fill="#F0E442" stroke="#000000" stroke-width="1" />
+<text x="468.2" y="72" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">execute</text>
+<rect x="537.9" y="60" width="14" height="14" fill="#CC79A7" stroke="#000000" stroke-width="1" />
+<text x="557.9" y="72" fill="#000000" font-size="12" font-family="Helvetica" font-weight="normal">shared</text>
+<rect x="18" y="106" width="254.1" height="504" fill="none" stroke="#000000" stroke-width="1" />
+<text x="28" y="124" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/first_exec</text>
+<rect x="28" y="138" width="234.1" height="26" fill="none" stroke="#000000" stroke-width="1" />
+<rect x="28" y="138" width="234.1" height="26" fill="#000000" stroke="#000000" stroke-width="1" />
+<text x="36" y="156" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">sh -c ./test_scripts/first_exec</text>
+<rect x="28" y="182" width="234.1" height="226" fill="none" stroke="#000000" stroke-width="1" />
+<rect x="28" y="182" width="234.1" height="26" fill="#000000" stroke="#000000" stroke-width="1" />
+<text x="36" y="200" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/first_exec</text>
+<rect x="28" y="208" width="117.05" height="20" fill="#0072B2" stroke="none" />
+<rect x="145.05" y="208" width="117.05" height="20" fill="#009E73" stroke="none" />
+<rect x="28" y="208" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="222" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file1.txt</text>
+<rect x="28" y="228" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="228" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="242" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file10.txt</text>
+<rect x="28" y="248" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="248" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="262" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file2.txt</text>
+<rect x="28" y="268" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="268" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="282" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file3.txt</text>
+<rect x="28" y="288" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="288" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="302" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file4.txt</text>
+<rect x="28" y="308" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="308" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="322" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file5.txt</text>
+<rect x="28" y="328" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="328" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="342" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file6.txt</text>
+<rect x="28" y="348" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="348" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="362" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file7.txt</text>
+<rect x="28" y="368" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="368" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="382" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file8.txt</text>
+<rect x="28" y="388" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="388" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="402" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file9.txt</text>
+<rect x="28" y="426" width="234.1" height="46" fill="none" stroke="#000000" stroke-width="1" />
+<rect x="28" y="426" width="234.1" height="26" fill="#000000" stroke="#000000" stroke-width="1" />
+<text x="36" y="444" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">first_exec_child1</text>
+<rect x="28" y="452" width="234.1" height="20" fill="#0072B2" stroke="none" />
+<rect x="28" y="452" width="234.1" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="36" y="466" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file11.txt</text>
+<rect x="28" y="490" width="234.1" height="46" fill="none" stroke="#F0E442" stroke-width="1" />
+<rect x="28" y="490" width="234.1" height="26" fill="#F0E442" stroke="#F0E442" stroke-width="1" />
+<text x="36" y="508" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">sh -c ./test_scripts/first_exec</text>
+<rect x="28" y="516" width="234.1" height="20" fill="#000000" stroke="#F0E442" stroke-width="1" />
+<text x="36" y="530" fill="#ffffff" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/first_exec</text>
+<rect x="28" y="554" width="234.1" height="46" fill="none" stroke="#F0E442" stroke-width="1" />
+<rect x="28" y="554" width="234.1" height="26" fill="#F0E442" stroke="#F0E442" stroke-width="1" />
+<text x="36" y="572" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/first_exec</text>
+<rect x="28" y="580" width="234.1" height="20" fill="#000000" stroke="#F0E442" stroke-width="1" />
+<text x="36" y="594" fill="#ffffff" font-size="11" font-family="monospace" font-weight="normal">first_exec_child1</text>
+<rect x="300.1" y="106" width="367.7" height="488" fill="none" stroke="#000000" stroke-width="1" />
+<text x="310.1" y="124" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/second_exec</text>
+<rect x="310.1" y="138" width="347.7" height="26" fill="none" stroke="#000000" stroke-width="1" />
+<rect x="310.1" y="138" width="347.7" height="26" fill="#000000" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="156" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">sh -c ./test_scripts/second_exec</text>
+<rect x="310.1" y="182" width="347.7" height="126" fill="none" stroke="#000000" stroke-width="1" />
+<rect x="310.1" y="182" width="347.7" height="26" fill="#000000" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="200" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/second_exec</text>
+<rect x="310.1" y="208" width="347.7" height="20" fill="#D55E00" stroke="none" />
+<rect x="310.1" y="208" width="347.7" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="222" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file10.txt</text>
+<rect x="310.1" y="228" width="173.85" height="20" fill="#D55E00" stroke="none" />
+<rect x="483.95" y="228" width="173.85" height="20" fill="#009E73" stroke="none" />
+<rect x="310.1" y="228" width="347.7" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="242" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file2.txt</text>
+<rect x="310.1" y="248" width="115.9" height="20" fill="#0072B2" stroke="none" />
+<rect x="426" y="248" width="115.9" height="20" fill="#D55E00" stroke="none" />
+<rect x="541.9" y="248" width="115.9" height="20" fill="#009E73" stroke="none" />
+<rect x="310.1" y="248" width="347.7" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="262" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file4.txt</text>
+<rect x="310.1" y="268" width="173.85" height="20" fill="#0072B2" stroke="none" />
+<rect x="483.95" y="268" width="173.85" height="20" fill="#D55E00" stroke="none" />
+<rect x="310.1" y="268" width="347.7" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="282" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file6.txt</text>
+<rect x="310.1" y="288" width="347.7" height="20" fill="#D55E00" stroke="none" />
+<rect x="310.1" y="288" width="347.7" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="302" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file8.txt</text>
+<rect x="310.1" y="326" width="347.7" height="46" fill="none" stroke="#000000" stroke-width="1" />
+<rect x="310.1" y="326" width="347.7" height="26" fill="#000000" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="344" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/second_exec_child1 example_param</text>
+<rect x="310.1" y="352" width="347.7" height="20" fill="#0072B2" stroke="none" />
+<rect x="310.1" y="352" width="347.7" height="20" fill="none" stroke="#000000" stroke-width="1" />
+<text x="318.1" y="366" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">/dev/shm/ts1/file2.txt</text>
+<rect x="310.1" y="390" width="347.7" height="46" fill="none" stroke="#F0E442" stroke-width="1" />
+<rect x="310.1" y="390" width="347.7" height="26" fill="#F0E442" stroke="#F0E442" stroke-width="1" />
+<text x="318.1" y="408" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">sh -c ./test_scripts/second_exec</text>
+<rect x="310.1" y="416" width="347.7" height="20" fill="#000000" stroke="#F0E442" stroke-width="1" />
+<text x="318.1" y="430" fill="#ffffff" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+<rect x="310.1" y="454" width="347.7" height="46" fill="none" stroke="#F0E442" stroke-width="1" />
+<rect x="310.1" y="454" width="347.7" height="26" fill="#F0E442" stroke="#F0E442" stroke-width="1" />
+<text x="318.1" y="472" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">./test_scripts/second_exec</text>
+<rect x="310.1" y="480" width="347.7" height="20" fill="#000000" stroke="#F0E442" stroke-width="1" />
+<text x="318.1" y="494" fill="#ffffff" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec_child1 example_param</text>
+<rect x="310.1" y="518" width="347.7" height="66" fill="none" stroke="#CC79A7" stroke-width="1" />
+<rect x="310.1" y="518" width="347.7" height="26" fill="#CC79A7" stroke="#CC79A7" stroke-width="1" />
+<text x="318.1" y="536" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">/dev/shm/ts1/file2.txt</text>
+<rect x="310.1" y="544" width="173.85" height="20" fill="#D55E00" stroke="none" />
+<rect x="483.95" y="544" width="173.85" height="20" fill="#009E73" stroke="none" />
+<rect x="310.1" y="544" width="347.7" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="318.1" y="558" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+<rect x="310.1" y="564" width="347.7" height="20" fill="#0072B2" stroke="none" />
+<rect x="310.1" y="564" width="347.7" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="318.1" y="578" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec_child1 example_param</text>
+<rect x="695.8" y="106" width="205.6" height="444" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="705.8" y="124" fill="#000000" font-size="12" font-family="Helvetica" font-weight="bold">shared across execs</text>
+<rect x="705.8" y="138" width="185.6" height="66" fill="none" stroke="#CC79A7" stroke-width="1" />
+<rect x="705.8" y="138" width="185.6" height="26" fill="#CC79A7" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="156" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">/dev/shm/ts1/file10.txt</text>
+<rect x="705.8" y="164" width="185.6" height="20" fill="#0072B2" stroke="none" />
+<rect x="705.8" y="164" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="178" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/first_exec</text>
+<rect x="705.8" y="184" width="185.6" height="20" fill="#D55E00" stroke="none" />
+<rect x="705.8" y="184" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="198" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+<rect x="705.8" y="222" width="185.6" height="66" fill="none" stroke="#CC79A7" stroke-width="1" />
+<rect x="705.8" y="222" width="185.6" height="26" fill="#CC79A7" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="240" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">/dev/shm/ts1/file2.txt</text>
+<rect x="705.8" y="248" width="185.6" height="20" fill="#0072B2" stroke="none" />
+<rect x="705.8" y="248" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="262" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/first_exec</text>
+<rect x="705.8" y="268" width="61.8667" height="20" fill="#0072B2" stroke="none" />
+<rect x="767.667" y="268" width="61.8667" height="20" fill="#D55E00" stroke="none" />
+<rect x="829.533" y="268" width="61.8667" height="20" fill="#009E73" stroke="none" />
+<rect x="705.8" y="268" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="282" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+<rect x="705.8" y="306" width="185.6" height="66" fill="none" stroke="#CC79A7" stroke-width="1" />
+<rect x="705.8" y="306" width="185.6" height="26" fill="#CC79A7" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="324" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">/dev/shm/ts1/file4.txt</text>
+<rect x="705.8" y="332" width="185.6" height="20" fill="#0072B2" stroke="none" />
+<rect x="705.8" y="332" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="346" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/first_exec</text>
+<rect x="705.8" y="352" width="61.8667" height="20" fill="#0072B2" stroke="none" />
+<rect x="767.667" y="352" width="61.8667" height="20" fill="#D55E00" stroke="none" />
+<rect x="829.533" y="352" width="61.8667" height="20" fill="#009E73" stroke="none" />
+<rect x="705.8" y="352" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="366" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+<rect x="705.8" y="390" width="185.6" height="66" fill="none" stroke="#CC79A7" stroke-width="1" />
+<rect x="705.8" y="390" width="185.6" height="26" fill="#CC79A7" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="408" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">/dev/shm/ts1/file6.txt</text>
+<rect x="705.8" y="416" width="185.6" height="20" fill="#0072B2" stroke="none" />
+<rect x="705.8" y="416" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="430" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/first_exec</text>
+<rect x="705.8" y="436" width="92.8" height="20" fill="#0072B2" stroke="none" />
+<rect x="798.6" y="436" width="92.8" height="20" fill="#D55E00" stroke="none" />
+<rect x="705.8" y="436" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="450" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+<rect x="705.8" y="474" width="185.6" height="66" fill="none" stroke="#CC79A7" stroke-width="1" />
+<rect x="705.8" y="474" width="185.6" height="26" fill="#CC79A7" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="492" fill="#ffffff" font-size="12" font-family="Helvetica" font-weight="bold">/dev/shm/ts1/file8.txt</text>
+<rect x="705.8" y="500" width="185.6" height="20" fill="#0072B2" stroke="none" />
+<rect x="705.8" y="500" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="514" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/first_exec</text>
+<rect x="705.8" y="520" width="185.6" height="20" fill="#D55E00" stroke="none" />
+<rect x="705.8" y="520" width="185.6" height="20" fill="none" stroke="#CC79A7" stroke-width="1" />
+<text x="713.8" y="534" fill="#000000" font-size="11" font-family="monospace" font-weight="normal">./test_scripts/second_exec</text>
+</svg>

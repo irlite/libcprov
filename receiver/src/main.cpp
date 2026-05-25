@@ -81,6 +81,7 @@ int main() {
         [&](const httplib::Request& req, httplib::Response& res) {
             std::cerr << "[http] POST /retriever_api size=" << req.body.size()
                       << "\n";
+            std::cerr << req.body << "\n";
             ParsedRetrieverData parsed_retriever_data =
                 parse_retriever_data(std::move(req.body));
             DBRetrieverData db_retriever_data =

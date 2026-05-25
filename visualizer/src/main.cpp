@@ -43,13 +43,13 @@ std::string http_post(const std::string& url, const std::string& data) {
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <cluster name> <job id>\n";
+        std::cerr << "Usage: " << argv[0] << " <job id> <cluster name>\n";
         return EXIT_FAILURE;
     }
-    std::string cluster_name = argv[1];
-    std::string job_id = argv[2];
+    std::string job_id = argv[1];
+    std::string cluster_name = argv[2];
     if (!is_number(job_id)) {
-        std::cerr << "Error: job_id must be a positive number, got: " << argv[2]
+        std::cerr << "Error: job_id must be a positive number, got: " << argv[1]
                   << "\n";
         return 1;
     }
@@ -61,7 +61,8 @@ int main(int argc, char* argv[]) {
     std::string body = http_post(url, payload);
     ParsedLibcprovData parsed_libcprov_data = parse_injector_data(body);
     if (parsed_libcprov_data.response_type == ResponseType::ProvData) {
-        build_graph(parsed_libcprov_data.job_data.value());
+        build_graph(parsed_libcprov_data.job_data.value(), job_id,
+                    cluster_name);
         std::cout << "Parsed data: " << body << std::endl;
     } else if (parsed_libcprov_data.response_type == ResponseType::Error) {
         std::cout << "Error" << std::endl;

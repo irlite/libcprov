@@ -38,6 +38,7 @@ void start_retriever(ParsedRetrieverCliInput parsed_retriever_cli_input,
     std::string endpoint_url = endpoint_url_base + "/retriever_api";
     std::string json_response =
         post_json_and_get_response(endpoint_url, output_string);
+    std::cout << json_response << "\n";
     ParsedRetrieverBackendResponse parsed_retriever_backend_response =
         parse_retriever_backend_response(std::move(json_response),
                                          retrieval_type);
