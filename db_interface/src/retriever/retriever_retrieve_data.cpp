@@ -39,14 +39,6 @@ std::vector<uint64_t> get_ordered_exec_ids(
     return ordered_exec_ids;
 }
 
-/*
- * Returns the filesystem state before the first tracked exec.
- *
- * A file is part of the initial state iff its first occurrence in the job
- * has a non-empty start_checksum. If the first occurrence has an empty
- * start_checksum, the file was created during the job and must not be restored
- * for exec 0.
- */
 std::unordered_map<std::string, std::string>
 get_initial_state_before_first_exec(
     const OrderedOperationsPerExecs& ordered_operations_per_execs,
@@ -73,16 +65,6 @@ get_initial_state_before_first_exec(
     return checksums_to_files;
 }
 
-/*
- * Returns the cumulative filesystem state immediately after exec_id concluded.
- *
- * For each file path:
- * - deleted files are removed from the state
- * - modified / created files use end_checksum if available
- * - read-only files keep their existing state; if they were first observed with
- *   a start_checksum and are not yet in state, they are inserted with that
- * checksum
- */
 std::unordered_map<std::string, std::string> get_state_after_exec(
     const OrderedOperationsPerExecs& ordered_operations_per_execs,
     uint64_t exec_id, const std::vector<uint64_t>& ordered_exec_ids) {
