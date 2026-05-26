@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 #include "config_parser.hpp"
@@ -16,115 +15,118 @@ std::string get_prov_artifacts_path() {
     return config.prov_artifacts_path;
 }
 
-std::unordered_set<std::string> get_internally_created_paths_before_exec(
-    const OrderedOperationsPerExecs& ordered_operations_per_execs,
-    uint64_t exec_id, const std::vector<uint64_t>& ordered_exec_ids) {
-    std::unordered_set<std::string> internally_created_paths;
-    std::unordered_set<std::string> resolved_paths;
-    OperationMap current_operation_map;
-    for (uint64_t current_exec_id : ordered_exec_ids) {
-        if (current_exec_id >= exec_id) {
-            break;
-        }
-        current_operation_map =
-            ordered_operations_per_execs.at(current_exec_id);
-        for (auto& [path, operations] : current_operation_map) {
-            if (resolved_paths.contains(path)) {
-                continue;
-            }
-            resolved_paths.insert(path);
-            if (operations.start_checksum == "") {
-                internally_created_paths.insert(path);
-            }
+void erase_path_from_state(
+    std::unordered_map<std::string, std::string>& checksums_to_files,
+    const std::string& path) {
+    for (auto it = checksums_to_files.begin();
+         it != checksums_to_files.end();) {
+        if (it->second == path) {
+            it = checksums_to_files.erase(it);
+        } else {
+            ++it;
         }
     }
-    return internally_created_paths;
 }
 
-std::unordered_map<std::string, std::string> get_state_before_exec(
+std::vector<uint64_t> get_ordered_exec_ids(
+    const OrderedOperationsPerExecs& ordered_operations_per_execs) {
+    std::vector<uint64_t> ordered_exec_ids;
+    ordered_exec_ids.reserve(ordered_operations_per_execs.size());
+    for (const auto& [exec_id, _] : ordered_operations_per_execs) {
+        ordered_exec_ids.push_back(exec_id);
+    }
+    std::sort(ordered_exec_ids.begin(), ordered_exec_ids.end());
+    return ordered_exec_ids;
+}
+
+/*
+ * Returns the filesystem state before the first tracked exec.
+ *
+ * A file is part of the initial state iff its first occurrence in the job
+ * has a non-empty start_checksum. If the first occurrence has an empty
+ * start_checksum, the file was created during the job and must not be restored
+ * for exec 0.
+ */
+std::unordered_map<std::string, std::string>
+get_initial_state_before_first_exec(
     const OrderedOperationsPerExecs& ordered_operations_per_execs,
-    uint64_t exec_id, const std::vector<uint64_t>& ordered_exec_ids) {
-    auto internally_created_paths = get_internally_created_paths_before_exec(
-        ordered_operations_per_execs, exec_id, ordered_exec_ids);
-    auto it = std::lower_bound(ordered_exec_ids.begin(), ordered_exec_ids.end(),
-                               exec_id);
-    std::vector<uint64_t> exec_ids_before_exec_reversed(
-        std::make_reverse_iterator(it), ordered_exec_ids.rend());
-    std::unordered_set<std::string> deleted_paths;
-    std::unordered_set<std::string> resolved_paths;
+    const std::vector<uint64_t>& ordered_exec_ids) {
     std::unordered_map<std::string, std::string> checksums_to_files;
-    OperationMap current_operation_map;
-    std::string start_checksum;
-    std::string end_checksum;
-    for (uint64_t current_exec_id : exec_ids_before_exec_reversed) {
-        current_operation_map =
+    std::unordered_map<std::string, bool> path_seen;
+
+    for (uint64_t current_exec_id : ordered_exec_ids) {
+        const OperationMap& current_operation_map =
             ordered_operations_per_execs.at(current_exec_id);
-        for (auto& [path, operations] : current_operation_map) {
-            if (resolved_paths.contains(path)) {
+
+        for (const auto& [path, operations] : current_operation_map) {
+            if (path_seen.contains(path)) {
                 continue;
             }
-            resolved_paths.insert(path);
-            if (internally_created_paths.contains(path)) {
-                continue;
-            }
-            start_checksum = operations.start_checksum;
-            end_checksum = operations.end_checksum;
-            if (start_checksum == "" && end_checksum == "") {
-                continue;
-            }
-            if (operations.deleted) {
-                deleted_paths.insert(path);
-                continue;
-            }
-            if (deleted_paths.contains(path)) {
-                continue;
-            }
-            if (end_checksum != "") {
-                checksums_to_files[end_checksum] = path;
-            } else if (start_checksum != "") {
-                checksums_to_files[start_checksum] = path;
+            path_seen[path] = true;
+
+            if (!operations.start_checksum.empty()) {
+                checksums_to_files[operations.start_checksum] = path;
             }
         }
     }
+
     return checksums_to_files;
 }
 
+/*
+ * Returns the cumulative filesystem state immediately after exec_id concluded.
+ *
+ * For each file path:
+ * - deleted files are removed from the state
+ * - modified / created files use end_checksum if available
+ * - read-only files keep their existing state; if they were first observed with
+ *   a start_checksum and are not yet in state, they are inserted with that
+ * checksum
+ */
 std::unordered_map<std::string, std::string> get_state_after_exec(
     const OrderedOperationsPerExecs& ordered_operations_per_execs,
     uint64_t exec_id, const std::vector<uint64_t>& ordered_exec_ids) {
-    auto it = std::lower_bound(ordered_exec_ids.begin(), ordered_exec_ids.end(),
-                               exec_id);
-    std::vector<uint64_t> exec_ids_after_exec;
-    if (it == ordered_exec_ids.end()) {
-        exec_ids_after_exec = ordered_exec_ids;
-    } else {
-        if (*it == exec_id) {
-            ++it;
+    std::unordered_map<std::string, std::string> checksums_to_files =
+        get_initial_state_before_first_exec(ordered_operations_per_execs,
+                                            ordered_exec_ids);
+
+    for (uint64_t current_exec_id : ordered_exec_ids) {
+        if (current_exec_id > exec_id) {
+            break;
         }
-        exec_ids_after_exec = std::vector<uint64_t>(it, ordered_exec_ids.end());
-    }
-    std::unordered_map<std::string, std::string> checksums_to_files;
-    std::unordered_set<std::string> resolved_paths;
-    std::unordered_set<std::string> excluded_paths;
-    OperationMap current_operation_map;
-    std::string start_checksum;
-    for (uint64_t current_exec_id : exec_ids_after_exec) {
-        current_operation_map =
+
+        const OperationMap& current_operation_map =
             ordered_operations_per_execs.at(current_exec_id);
-        for (auto& [path, operations] : current_operation_map) {
-            if (resolved_paths.contains(path) ||
-                excluded_paths.contains(path)) {
+
+        for (const auto& [path, operations] : current_operation_map) {
+            if (operations.deleted) {
+                erase_path_from_state(checksums_to_files, path);
                 continue;
             }
-            start_checksum = operations.start_checksum;
-            if (start_checksum == "") {
-                excluded_paths.insert(path);
+
+            if (!operations.end_checksum.empty()) {
+                erase_path_from_state(checksums_to_files, path);
+                checksums_to_files[operations.end_checksum] = path;
                 continue;
             }
-            checksums_to_files[start_checksum] = path;
-            resolved_paths.insert(path);
+
+            if (!operations.start_checksum.empty()) {
+                bool path_already_present = false;
+                for (const auto& [checksum, existing_path] :
+                     checksums_to_files) {
+                    if (existing_path == path) {
+                        path_already_present = true;
+                        break;
+                    }
+                }
+
+                if (!path_already_present) {
+                    checksums_to_files[operations.start_checksum] = path;
+                }
+            }
         }
     }
+
     return checksums_to_files;
 }
 
@@ -141,29 +143,30 @@ void move_artifact(const std::string& prov_artifacts_path,
 }
 
 void rebuild_state(const std::string& prov_artifacts_path,
-                   std::unordered_map<std::string, std::string> state) {
-    for (auto& [checksum, path] : state) {
+                   const std::unordered_map<std::string, std::string>& state) {
+    for (const auto& [checksum, path] : state) {
         move_artifact(prov_artifacts_path, checksum, path);
     }
 }
 
 void retrieve_exec_state(OrderedOperationsPerExecs ordered_operations_per_execs,
                          uint64_t exec_id) {
-    std::vector<uint64_t> ordered_exec_ids;
-    for (auto& [exec_id, _] : ordered_operations_per_execs) {
-        ordered_exec_ids.push_back(exec_id);
-    }
-    std::sort(ordered_exec_ids.begin(), ordered_exec_ids.end());
+    std::vector<uint64_t> ordered_exec_ids =
+        get_ordered_exec_ids(ordered_operations_per_execs);
+
     std::string prov_artifacts_path = get_prov_artifacts_path();
-    std::unordered_map<std::string, std::string> state_before_exec =
-        get_state_before_exec(ordered_operations_per_execs, exec_id,
-                              ordered_exec_ids);
-    rebuild_state(prov_artifacts_path, std::move(state_before_exec));
-    std::unordered_map<std::string, std::string> state_after_exec =
-        get_state_after_exec(ordered_operations_per_execs, exec_id,
-                             ordered_exec_ids);
-    rebuild_state(prov_artifacts_path, std::move(state_after_exec));
-};
+
+    std::unordered_map<std::string, std::string> state;
+    if (exec_id == 0) {
+        state = get_initial_state_before_first_exec(
+            ordered_operations_per_execs, ordered_exec_ids);
+    } else {
+        state = get_state_after_exec(ordered_operations_per_execs, exec_id,
+                                     ordered_exec_ids);
+    }
+
+    rebuild_state(prov_artifacts_path, state);
+}
 
 void retrieve_single_file(FileData file_data) {
     std::string prov_artifacts_path = get_prov_artifacts_path();
