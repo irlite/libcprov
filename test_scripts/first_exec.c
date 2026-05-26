@@ -36,6 +36,22 @@ int main() {
         fclose(fp);
     }
 
+    snprintf(filename, sizeof(filename), "%s/existing_file1.txt", BASE_PATH);
+    fp = fopen(filename, "a");
+    if (fp != NULL) {
+        fprintf(fp, "Accessed by program\n");
+        fclose(fp);
+    }
+
+    fp = fopen(filename, "r");
+    if (fp != NULL) {
+        char buffer[100];
+        while (fgets(buffer, sizeof(buffer), fp)) {
+            printf("%s", buffer);
+        }
+        fclose(fp);
+    }
+
     snprintf(filename, sizeof filename, "%s/file1.txt", BASE_PATH);
     if (unlink(filename) != 0) perror("unlink");
     printf("10 files created in %s\n", BASE_PATH);

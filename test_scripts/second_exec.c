@@ -23,6 +23,23 @@ int main() {
         printf("\n");
         fclose(fp);
     }
+
+    snprintf(filename, sizeof(filename), "%s/existing_file2.txt", BASE_PATH);
+    fp = fopen(filename, "a");
+    if (fp != NULL) {
+        fprintf(fp, "Accessed by program\n");
+        fclose(fp);
+    }
+
+    fp = fopen(filename, "r");
+    if (fp != NULL) {
+        char buffer[100];
+        while (fgets(buffer, sizeof(buffer), fp)) {
+            printf("%s", buffer);
+        }
+        fclose(fp);
+    }
+
     snprintf(filename, sizeof(filename), "%s/file2.txt", BASE_PATH);
     unlink(filename);
     printf("Deleted %s\n", filename);
