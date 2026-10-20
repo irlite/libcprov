@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Barnstorf"
+  given-names: "Maxim"
+title: "libcprov"
+version: 1.0.0
+date-released: 2026-07-29
+url: "https://doi.org/10.25625/IWHFEY"
